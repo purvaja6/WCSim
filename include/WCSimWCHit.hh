@@ -77,7 +77,7 @@ class WCSimWCHit : public G4VHit
 
     if (totalPe > maxPe) 
       maxPe = totalPe;
-
+	std::cout << "maxPe" << maxPe << std::endl;
     time.push_back(hitTime);
   }
  

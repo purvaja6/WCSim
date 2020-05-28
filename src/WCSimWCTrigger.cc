@@ -498,6 +498,7 @@ void WCSimWCDigiTrigger::Print()
 // DERIVED CLASS
 // *******************************************
 
+//constructor: A member function which initializes the object of a class. A class name(parameters)
 WCSimWCTriggerNDigits::WCSimWCTriggerNDigits(G4String name,
 					 WCSimDetectorConstruction* myDetector,
 					 WCSimWCDAQMessenger* myMessenger)

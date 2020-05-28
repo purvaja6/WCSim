@@ -64,6 +64,7 @@ void WCSimWCDigi::Print()
 	    << " PE: "    << pe[i]
 	    << " Time:"   << time[i] << G4endl;
   }
+std::cout << "hola" << std::endl;
 }
 
 std::vector<int> WCSimWCDigi::GetDigiCompositionInfo(int gate)

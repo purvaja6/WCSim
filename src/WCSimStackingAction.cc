@@ -13,7 +13,6 @@
 
 #include "G4PhysicalConstants.hh"
 #include "G4SystemOfUnits.hh"
-
 //class WCSimDetectorConstruction;
 
 WCSimStackingAction::WCSimStackingAction(WCSimDetectorConstruction* myDet):DetConstruct(myDet) {;}
@@ -21,26 +20,31 @@ WCSimStackingAction::~WCSimStackingAction(){;}
 
 
 G4ClassificationOfNewTrack WCSimStackingAction::ClassifyNewTrack
-(const G4Track* aTrack) 
+(const G4Track* aTrack) //A pointer aTrack to a const G4Track 
 {
   G4String WCIDCollectionName = DetConstruct->GetIDCollectionName();
   G4ClassificationOfNewTrack classification    = fWaiting;
-  G4ParticleDefinition*      particleType      = aTrack->GetDefinition();
+  G4ParticleDefinition*      particleType      = aTrack->GetDefinition(); //A pointer particleType pointing to G4ParticleDefinition which has the values pointed by aTrack pointer to G4Track which contains GetDefinition
   
-
+//
+// std::cout << "ClassifyNewTrack: particle = " << particleType->GetParticleName() << " " << " PDGEncoding" << " " << particleType->GetPDGEncoding() << std::endl;
+ //std::cout << "PDG mass = " << " " << particleType->GetPDGMass() << std::endl;
+ //std::cout << "PDG charge = " << " " << particleType->GetPDGCharge() << std::endl;
   // Make sure it is an optical photon
   if( particleType == G4OpticalPhoton::OpticalPhotonDefinition() )
     {
+	
       // TF: cleaned this up a little: no repetition of code.
       // also don't know why CreatorProcess() == NULL needs to have QE applied.
       // use QE method for ALL.
       if( aTrack->GetCreatorProcess() == NULL ||          // eg. particle gun/gps photons
 	  ( aTrack->GetCreatorProcess() != NULL && 
-	    ((G4VProcess*)(aTrack->GetCreatorProcess()))->GetProcessType() != fOptical) ) {
-	
+	    ((G4VProcess*)(aTrack->GetCreatorProcess()))->GetProcessType() != fOptical) ) {	//fOptical is a G4Type which is a enumerator (a symbolic name for a set of values)
+	//std::cout << "totalenergy = " << aTrack->GetTotalEnergy() << std::endl;
+	//std::cout << "process type = " << aTrack->GetCreatorProcess()->GetProcessType() << std::endl;
 	G4float photonWavelength = (2.0*M_PI*197.3)/(aTrack->GetTotalEnergy()/eV);
 	G4float ratio = 1./(1.0-0.25);
-	G4float wavelengthQE = 0;
+	G4float wavelengthQE = 0;	
 	
 	// MF : translated from skdetsim : better to increase the number of photons
 	// than to throw in a global factor  at Digitization time !
@@ -53,12 +57,15 @@ G4ClassificationOfNewTrack WCSimStackingAction::ClassifyNewTrack
 	  wavelengthQE  = DetConstruct->GetPMTQE(WCIDCollectionName,photonWavelength,1,240,660,ratio);
 	}else if (DetConstruct->GetPMT_QE_Method()==2){
 	  wavelengthQE  = DetConstruct->GetPMTQE(WCIDCollectionName,photonWavelength,0,240,660,ratio);
+  //      std::cout << "wavelengthQE = " << wavelengthQE << std::endl; 
 	}else if (DetConstruct->GetPMT_QE_Method()==3 || DetConstruct->GetPMT_QE_Method() == 4){
 	  wavelengthQE = 1.1;
 	}
 	
-	if( G4UniformRand() > wavelengthQE )
+	if( G4UniformRand() > wavelengthQE ){
 	  classification = fKill;
+    //   	  std::cout << "classification = " << classification << std::endl;
+	}
       }
     }
   

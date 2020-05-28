@@ -135,7 +135,7 @@ int main(int argc,char** argv)
       //return -1;
     }
     UI->ApplyCommand(command+fileName);
-
+    std::cout << "wcsim.exe applycommand" << std::endl;
   }
 
   delete visManager;

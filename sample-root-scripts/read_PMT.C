@@ -44,11 +44,11 @@ void read_PMT(char *filename=NULL) {
 
   // Currently only looks at one event.  I suspect you could loop over more events, if they existed.
   WCSimRootTrigger *wcsimrootevent = wcsimrootsuperevent->GetTrigger(0);
-
+  
   //--------------------------
   // As you can see, there are lots of ways to get the number of hits.
   cout << "Number of tube hits " << wcsimrootevent->GetNumTubesHit() << endl;
-  cout << "Number of Cherenkov tube hits " << wcsimrootevent->GetNcherenkovhits() << endl;
+cout << "Number of Cherenkov tube hits " << wcsimrootevent->GetNcherenkovhits() << endl;
   cout << "Number of Cherenkov tube hits " << wcsimrootevent->GetCherenkovHits()->GetEntries() << endl;
 
   cout << "Number of digitized tube hits " << wcsimrootevent->GetNumDigiTubesHit() << endl;

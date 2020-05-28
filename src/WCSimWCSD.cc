@@ -63,6 +63,7 @@ void WCSimWCSD::Initialize(G4HCofThisEvent* HCE)
 
   WCSimWCHit* newHit = new WCSimWCHit();
   newHit->SetMaxPe(0);
+//  std::cout << "Creating a new hit" << std::endl;
   delete newHit;
 }
 
@@ -79,7 +80,7 @@ G4bool WCSimWCSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
   G4ThreeVector worldDirection = preStepPoint->GetMomentumDirection();
   G4ThreeVector localDirection = theTouchable->GetHistory()->GetTopTransform().TransformAxis(worldDirection);
 
-
+  std::cout << "local direction = " << localDirection << std::endl; 
   WCSimTrackInformation* trackinfo 
     = (WCSimTrackInformation*)(aStep->GetTrack()->GetUserInformation());
   
@@ -91,12 +92,14 @@ G4bool WCSimWCSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
     primParentID = trackinfo->GetPrimaryParentID();  //!= ParentID.
     photonStartTime = trackinfo->GetPhotonStartTime();
     photonStartPos = trackinfo->GetPhotonStartPos();
-  }
+    std::cout << "Added to stored track info : " << photonStartPos << std::endl;
+	}
   else { // if there is no trackinfo, then it is a primary particle!
     primParentID = aStep->GetTrack()->GetTrackID();
     photonStartTime = aStep->GetTrack()->GetGlobalTime();
     photonStartPos = aStep->GetTrack()->GetVertexPosition();
-  }
+    std::cout << "Created a new track info : " << photonStartPos << std::endl;
+	}
 
 
   G4int    trackID           = aStep->GetTrack()->GetTrackID();
@@ -119,8 +122,9 @@ G4bool WCSimWCSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
   // M Fechner : too verbose
   //  if (aStep->GetTrack()->GetTrackStatus() == fAlive)G4cout << "status is fAlive\n";
   if ((aStep->GetTrack()->GetTrackStatus() == fAlive )
-      &&(particleDefinition == G4OpticalPhoton::OpticalPhotonDefinition()))
-    return false;
+      &&(particleDefinition == G4OpticalPhoton::OpticalPhotonDefinition())){
+ //     std::cout << "Its Alive " << std::endl;
+	return false;}
   
   // TF: Problem: photons can go through the sensitive detector (glass)
   // and be killed in the next volume by Absorption, eg. in the BlackSheet, but will then
@@ -138,10 +142,10 @@ G4bool WCSimWCSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
   // Not an issue yet, because then interior needs to be a sensitive detector, when postStepPoint is the glass.
   if(postVol->GetName() != "InteriorWCPMT")
     return false;
-  
+   // std::cout << "interiorwcpmt" << std::endl; 
 
   //  if ( particleDefinition ==  G4OpticalPhoton::OpticalPhotonDefinition() ) 
-  // G4cout << volumeName << " hit by optical Photon! " << G4endl;
+    //G4cout << volumeName << " hit by optical Photon! " << G4endl;
     
   // Make the tubeTag string based on the replica numbers
   // See WCSimDetectorConstruction::DescribeAndRegisterPMT() for matching
@@ -184,6 +188,7 @@ G4bool WCSimWCSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
     maxQE = fdet->GetPMTQE(WCIDCollectionName,wavelength,0,240,660,ratio);
     photonQE = fdet->GetPMTQE(volumeName, wavelength,1,240,660,ratio);
     photonQE = photonQE/maxQE;
+   // std::cout << "photonQE_SD = " << photonQE << std::endl;
   }else if (fdet->GetPMT_QE_Method() == 3){
     ratio = 1./(1.-0.25);
     photonQE = fdet->GetPMTQE(volumeName, wavelength,1,240,660,ratio);
@@ -233,7 +238,7 @@ G4bool WCSimWCSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 	   (*hitsCollection)[PMTHitMap[replicaNumber]-1]->AddPhotonEndPos(worldPosition);
 	   
 	   //     if ( particleDefinition != G4OpticalPhoton::OpticalPhotonDefinition() )
-	   //       newHit->Print();
+	   //     newHit->Print();
 	     
 	 }
        else {
@@ -286,4 +291,3 @@ void WCSimWCSD::EndOfEvent(G4HCofThisEvent* HCE)
     */
   } 
 }
-
