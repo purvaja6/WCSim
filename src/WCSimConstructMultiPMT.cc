@@ -84,8 +84,7 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructMultiPMT(G4String PMTName, 
   G4double mPMT_RRange_outer[2] = {vessel_radius, 
 				   vessel_radius};
   G4double mPMT_rRange_outer[2] = {0., 0.};
-std::cout << "vessel_cyl_height" << vessel_cyl_height << std::endl;
-std::cout << "vessel_cap_height" << vessel_cap_height << std::endl;
+
   // Although G4Tubs is more natural, Polycone is used to be in control of z position
   // and because z = 0 is position of bottom of cylinder, vs center in G4Tubs
   G4Polycone* solidMultiPMT = 
@@ -172,7 +171,7 @@ std::cout << "vessel_cap_height" << vessel_cap_height << std::endl;
 		   vessel_cyl_height/2.,
 		   0.0*deg,
 		   360.0*deg);
-     std::cout << "vessel_cyl_height/2 " << vessel_cyl_height/2 << std::endl; 
+      
       
       /* NEW: UnionSolid instead (but should I be worried about performance? Other solutions?)
 	 KEEP CODE below in case the material between both volumes becomes different at some stage !!!!!!
@@ -256,8 +255,7 @@ std::cout << "vessel_cap_height" << vessel_cap_height << std::endl;
       //                   to avoid overlaps, needs to be one solid.
       G4UnionSolid *union_vessel = 
 	new G4UnionSolid("VesselUnion",mPMT_cylinder_vessel,mPMT_top_sphere_vessel,0,G4ThreeVector(0,0,vessel_cyl_height/2));
-int fg =  vessel_cyl_height/2;    
- std::cout << "WCPMT_vessel_z" <<  fg << std::endl;
+      
       
       logic_mPMT_vessel =
 	new G4LogicalVolume(union_vessel,
@@ -437,7 +435,7 @@ int fg =  vessel_cyl_height/2;
     new G4PVPlacement(0,			            // its rotation
 		      G4ThreeVector(0,0,0),	            // its position
 		      logic_mPMT_container,      // its logical volume
-		      "WCPMT_container",		    // its name //me: Matrix 
+		      "WCPMT_container",		    // its name 
 		      logic_mPMT_vessel,	    // its mother volume
 		      false,			            // no boolean os
 		      0, 

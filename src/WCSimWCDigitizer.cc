@@ -89,7 +89,7 @@ void WCSimWCDigitizerBase::Digitize()
   DigiStore = new WCSimWCDigitsCollection(collectionName[0],collectionName[0]);
 
   G4DigiManager* DigiMan = G4DigiManager::GetDMpointer();
- //std::cout << "ho ho" << std::endl; 
+  
   // Get the PMT collection ID
    G4int WCHCID = DigiMan->GetDigiCollectionID("WCRawPMTSignalCollection");
 

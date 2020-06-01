@@ -51,17 +51,10 @@ G4float WCSimDetectorConstruction::GetPMTQE(G4String CollectionName, G4float Pho
   PMT = GetPMTPointer(CollectionName);
   G4float *wavelength;
   wavelength = PMT->GetQEWavelength();
-  	G4float wave;
-  	wave = *PMT->GetQEWavelength();
-  	std::cout << "wave = " << wave << std::endl;
   G4double *QE;
   QE = PMT->GetQE();
-  	G4double Qe;
-	Qe = *PMT->GetQE();
-	std::cout << "QE =" << Qe << std::endl;
   G4float maxQE;
   maxQE = PMT->GetmaxQE();
-  std::cout << "maxQE = " << maxQE << std::endl;
   G4double wavelengthQE = 0;
 
   if (flag == 1){

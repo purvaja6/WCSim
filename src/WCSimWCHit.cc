@@ -47,6 +47,7 @@ G4int WCSimWCHit::operator==(const WCSimWCHit& right) const
 {
   return (this==&right) ? 1 : 0;
 }
+
 void WCSimWCHit::Draw()
 {
   G4VVisManager* pVVisManager = G4VVisManager::GetConcreteInstance();
@@ -56,7 +57,7 @@ void WCSimWCHit::Draw()
     G4VisAttributes attribs;
 
     G4String volumeName        = pLogV->GetName();
-	std::cout << "volumeName -> " << volumeName << std::endl;
+
     // volumeName should be compared to ID/OD CollectionName of the SensitiveDetector
     // instead of accessing those exactly here, just grab the substring: It should be "a" glassFaceWCPMT. Later optional check for OD?
     if ( volumeName.find("glassFaceWCPMT") != std::string::npos ||
@@ -169,7 +170,7 @@ void WCSimWCHit::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS,
     fG = 0;
     fB = 0;
   }
- std::cout << "hola " << std::endl;
+  
   fR += fM;
   fG += fM;
   fB += fM;

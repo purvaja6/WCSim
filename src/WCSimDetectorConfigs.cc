@@ -449,7 +449,7 @@ void WCSimDetectorConstruction::SetNuPrism_mPMTGeometry()
 
 // Short version of NuPRISM with mPMTs: 6 m tall ID
 // These are defaults that can be altered through the macros
-
+/*  //default wcsim geometry
 void WCSimDetectorConstruction::SetNuPrismShort_mPMTGeometry()
 {
 	WCDetectorName = "NuPRISMShort_mPMT";
@@ -501,10 +501,10 @@ void WCSimDetectorConstruction::SetNuPrismShort_mPMTGeometry()
 	WCBlackSheetThickness = 2.0*cm;    // deprecate soon.
 	WCAddGd               = false;
 
-}
+}*/
 
 
-/*
+
 //changed from here for solidworks geometry
 void WCSimDetectorConstruction::SetNuPrismShort_mPMTGeometry()
 {
@@ -560,7 +560,6 @@ void WCSimDetectorConstruction::SetNuPrismShort_mPMTGeometry()
 }
 
 //till here
-*/
 
 
 void WCSimDetectorConstruction::SetTestSinglemPMTGeometry()

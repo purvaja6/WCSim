@@ -143,7 +143,7 @@
 /Tracking/fractionOpticalPhotonsToDraw 0.0
 
 ## change the name of the output root file, default = wcsim.root
-/WCSimIO/RootFile wcsim_output_trial.root
+/WCSimIO/RootFile wcsim_output.root
 
 ## Boolean to select whether to save the NEUT RooTracker vertices in the output file, provided you used
 ## a NEUT vector file as input
