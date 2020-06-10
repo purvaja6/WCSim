@@ -34,7 +34,8 @@ public:
   WCSimEventAction(WCSimRunAction*, WCSimDetectorConstruction*,
 		   WCSimPrimaryGeneratorAction*);
   ~WCSimEventAction();
-  
+
+
 public:
   void BeginOfEventAction(const G4Event*);
   void EndOfEventAction(const G4Event*);

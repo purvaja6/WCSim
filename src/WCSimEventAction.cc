@@ -40,6 +40,8 @@
 #include "WCSimRootEvent.hh"
 #include "TStopwatch.h"
 
+#include "WCSimWCSD.hh" //me:logicreflector
+
 #ifndef _SAVE_RAW_HITS
 #define _SAVE_RAW_HITS
 #ifndef _SAVE_RAW_HITS_VERBOSE
@@ -59,7 +61,7 @@
 
 WCSimEventAction::WCSimEventAction(WCSimRunAction* myRun, 
 				   WCSimDetectorConstruction* myDetector, 
-				   WCSimPrimaryGeneratorAction* myGenerator)
+				   WCSimPrimaryGeneratorAction* myGenerator) //me:constructor
   :runAction(myRun), generatorAction(myGenerator), 
    detectorConstructor(myDetector),
    ConstructedDAQClasses(false),
@@ -100,6 +102,7 @@ void WCSimEventAction::CreateDAQInstances()
   if(DigitizerChoice == "SKI") {
     WCSimWCDigitizerSKI* WCDM = new WCSimWCDigitizerSKI("WCReadoutDigits", detectorConstructor, DAQMessenger);
     DMman->AddNewModule(WCDM);
+std::cout << "SKIasadigitizer" << std::endl;
   }
   else {
     G4cerr << "Unknown DigitizerChoice " << DigitizerChoice << G4endl;
@@ -110,6 +113,7 @@ void WCSimEventAction::CreateDAQInstances()
   if(TriggerChoice == "NDigits") {
     WCSimWCTriggerNDigits* WCTM = new WCSimWCTriggerNDigits("WCReadout", detectorConstructor, DAQMessenger);
     DMman->AddNewModule(WCTM);
+std::cout << "triggermodultriggermodule" << std::endl;
   }
   else if(TriggerChoice == "NDigits2") {
     WCSimWCTriggerNDigits2* WCTM = new WCSimWCTriggerNDigits2("WCReadout", detectorConstructor, DAQMessenger);
@@ -133,6 +137,8 @@ void WCSimEventAction::BeginOfEventAction(const G4Event*)
     G4DigiManager* DMman = G4DigiManager::GetDMpointer();
 
   }
+WCSimWCSD *pSD = WCSimWCSD::aSDPointer;// me:for logicreflector
+pSD->reflectortag.clear(); //me:for logicreflector 
 }
 
 void WCSimEventAction::EndOfEventAction(const G4Event* evt)
@@ -473,6 +479,7 @@ void WCSimEventAction::EndOfEventAction(const G4Event* evt)
 		   trajectoryContainer,
 		   WCDC_hits,
 		   WCDC);
+std::cout << "you are here" << std::endl;
    }
   
   
@@ -496,7 +503,8 @@ void WCSimEventAction::EndOfEventAction(const G4Event* evt)
     generatorAction->SaveOptionsToOutput(wcsimopt);
     
     SavedOptions = true;
-  }
+std::cout << "notsaved" << std::endl; 
+ }
 }
 
 G4int WCSimEventAction::WCSimEventFindStartingVolume(G4ThreeVector vtx)
@@ -888,6 +896,7 @@ void WCSimEventAction::FillRootEvent(G4int event_id,
     //loop over the DigitsCollection
     for(int idigi = 0; idigi < WCDC_hits->entries(); idigi++) {
       int digi_tubeid = (*WCDC_hits)[idigi]->GetTubeID();
+      int digi_iHR = (*WCDC_hits)[idigi]->GetIsHitReflector();
       WCSimPmtInfo *pmt = ((WCSimPmtInfo*)fpmts->at(digi_tubeid -1));
 
       for(G4int id = 0; id < (*WCDC_hits)[idigi]->GetTotalPe(); id++){
@@ -926,6 +935,7 @@ void WCSimEventAction::FillRootEvent(G4int event_id,
       }
 #endif
       wcsimrootevent->AddCherenkovHit(digi_tubeid,
+				      digi_iHR,
 				      pmt->Get_mPMTid(),
 				      pmt->Get_mPMT_pmtid(),
 				      truetime,

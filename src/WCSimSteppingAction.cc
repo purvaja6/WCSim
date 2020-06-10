@@ -13,7 +13,7 @@
 #include "G4SDManager.hh"
 #include "G4RunManager.hh"
 #include "G4OpBoundaryProcess.hh"
-
+#include "WCSimWCSD.hh"
 
 
 G4int WCSimSteppingAction::n_photons_through_mPMTLV = 0;
@@ -25,6 +25,10 @@ G4int WCSimSteppingAction::n_photons_on_smallPMT = 0;
 
 void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 {
+
+	WCSimWCSD *pSD = WCSimWCSD::aSDPointer;// me:for logicreflector
+
+
 	//DISTORTION must be used ONLY if INNERTUBE or INNERTUBEBIG has been defined in BidoneDetectorConstruction.cc
 
 	const G4Track* track       = aStep->GetTrack();
@@ -40,6 +44,32 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 	// Debug for photon tracking
 	G4StepPoint* thePrePoint = aStep->GetPreStepPoint();
 	//me:changed from here
+	G4TouchableHandle theTouchable = thePrePoint->GetTouchableHandle(); //me:will tell you where in the geometry you are
+	G4String VolumeName = theTouchable->GetVolume()->GetLogicalVolume()->GetName();
+	G4ParticleDefinition *particleDefinition =    aStep->GetTrack()->GetDefinition();
+
+
+	if(VolumeName == "reflectorCone" && particleDefinition == G4OpticalPhoton::OpticalPhotonDefinition())
+	{
+		bool tagflag=true;
+
+		if(tagflag)
+		{
+			pSD->reflectortag.push_back(track->GetTrackID());
+		}
+		
+		for(unsigned ij=0; ij < pSD->reflectortag.size(); ij++) //me: this will check the trackID of all the photons in an event (of any particle) 
+		{
+			if(track->GetTrackID() == pSD->reflectortag[ij]) 
+			{
+				tagflag=false;
+				break;
+			}		
+
+		}
+	}	
+
+
 	G4ThreeVector PrePosition = aStep->GetPreStepPoint()->GetPosition();
 	// std::cout <<"PrePosition_x " << PrePosition(0) << std::endl;
 	// std::cout << "PrePosition_z " << PrePosition(2) << std::endl;
@@ -101,12 +131,6 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 			*/
 	//	if((preposition_r >= 49.5983 && preposition_r <=50.85 )||( postposition_r >= 49.5983 && postposition_r <= 50.85))
 	//	{
-	G4ThreeVector vertex_position = aStep -> GetTrack()->GetVertexPosition();
-	G4ThreeVector vertex_direction = aStep -> GetTrack() -> GetVertexMomentumDirection();
-	G4double vertex_x = vertex_position(0) + 314.159;
-	G4double vertex_y = vertex_position(1) + 2861.23;
-	G4double vertex_z = vertex_position(2) + 314.159;
-	G4double vertex_r = sqrt(pow(vertex_x,2)+pow(vertex_z,2));
 	//aStep -> GetTrack()->  SetVertexPosition(vertex_x, vertex_y, vertex_z);
 
 	//		std::cout << "vertex_position_x = "  << vertex_x << std::endl;
@@ -157,40 +181,59 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 
 			if( (*pv)[i]->GetProcessType()==fOptical && (*pv)[i]->GetProcessSubType() == 32 )
 			{
-				G4cout<<" ProcessName:" << (*pv)[i]->GetProcessName() <<G4endl;				
+				G4ThreeVector vertex_position = aStep -> GetTrack()->GetVertexPosition();
+				G4ThreeVector vertex_direction = aStep -> GetTrack() -> GetVertexMomentumDirection();
+				G4double vertex_x = vertex_position(0) ;
+				G4double vertex_y = vertex_position(1) ;
+				G4double vertex_z = vertex_position(2) ;
+				//				G4double vertex_r = sqrt(pow(vertex_x,2)+pow(vertex_z,2));
+				if(vertex_x>=-330 && vertex_x<=-290 && vertex_z>=-345 && vertex_z<=-333)
+				{	
+					G4cout<<" ProcessName:" << (*pv)[i]->GetProcessName() <<G4endl;				
+					boundary = (G4OpBoundaryProcess*)(*pv)[i];
+					G4cout<<"  G4OpBoundaryProcessStatus:" << boundary->GetStatus() <<G4endl;
+					//	std::cout << "PreStep Radius  = " << preposition_r << std::endl;
+					std::cout << "vertex_x = " <<  vertex_position(0) << std::endl;
+					std::cout << "vertex_y = " <<  vertex_position(1) << std::endl;
+					std::cout << "vertex_z = " <<  vertex_position(2) << std::endl;
+					std::cout << "PreStep Material " << thePrePoint->GetMaterial()->GetName() << std::endl;
+					std::cout << "PreStep Momentum = " << PreMomentum << std::endl;
+					std::cout << "PreStep MomentumDirection = " << PreMomentumDirection << std::endl;
+
+
+					std::cout << "PostStep Radius  = " << postposition_r << std::endl;
+					std::cout << "PostStep Material " << thePostPoint->GetMaterial()->GetName() << std::endl;
+					std::cout << "PostStep Momentum = " << PostMomentum << std::endl;
+					std::cout << "PostStep MomentumDirection = " << PostMomentumDirection << std::endl;
+					//	G4double angle = acos((x*X + y*Y + z*Z)/((sqrt(x*x + y*y + z*z)) * (sqrt(X*X + Y*Y + Z*Z))));
+					//	std::cout << " angle_calculated = " << angle << std::endl;
+					G4double Angle = PostMomentumDirection.angle(PreMomentumDirection);
+					std::cout << " Angle = " << Angle << std::endl;
+					G4double steplength = aStep -> GetStepLength();
+					std::cout << "steplength = " << steplength << std::endl;
+				}
+
+				break;
+			}
+		}
+
+		for(G4int j=0;j<nprocesses;j++)
+		{
+
+			if( (*pv)[j]->GetProcessType()==fOptical && (*pv)[j]->GetProcessSubType() == 32 )
+			{
 				boundary = (G4OpBoundaryProcess*)(*pv)[i];
-				G4cout<<"  G4OpBoundaryProcessStatus:" << boundary->GetStatus() <<G4endl;
 				if(boundary-> GetStatus() ==4)
 				{			
-					//		if(vertex_r >= 49.5983 && vertex_r <= 50.4975)
 					if(thePrePoint->GetMaterial()->GetName()=="SilGel" && thePostPoint->GetMaterial()->GetName()=="Air")
 
 					{
-						std::cout << "PreStep Radius  = " << preposition_r << std::endl;
-						std::cout << "PreStep Material " << thePrePoint->GetMaterial()->GetName() << std::endl;
-						std::cout << "PreStep Momentum = " << PreMomentum << std::endl;
-						std::cout << "PreStep MomentumDirection = " << PreMomentumDirection << std::endl;
-
-
-						std::cout << "PostStep Radius  = " << postposition_r << std::endl;
-						std::cout << "PostStep Material " << thePostPoint->GetMaterial()->GetName() << std::endl;
-						std::cout << "PostStep Momentum = " << PostMomentum << std::endl;
-						std::cout << "PostStep MomentumDirection = " << PostMomentumDirection << std::endl;
-						G4double angle = acos((x*X + y*Y + z*Z)/((sqrt(x*x + y*y + z*z)) * (sqrt(X*X + Y*Y + Z*Z))));
-						std::cout << " angle_calculated = " << angle << std::endl;
-						G4double Angle = PostMomentumDirection.angle(PreMomentumDirection);
-						std::cout << " angle_function = " << Angle << std::endl;
-
 						aStep ->GetTrack() ->  SetTrackStatus(fKillTrackAndSecondaries);
 					}
-
-					break;
 				}
 			}
-		}
+		}	
 	}
-
-
 	//changed from here
 	/*	if( (*pv)[i]->GetProcessType()==fOptical && (*pv)[i]->GetProcessSubType() == 32 )
 		{
@@ -252,30 +295,30 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 
 
 
-		if(track->GetTrackStatus() == fStopAndKill)
-		{
-			if(boundary->GetStatus() == NoRINDEX)
-			{
+		/*		if(track->GetTrackStatus() == fStopAndKill)
+				{
+				if(boundary->GetStatus() == NoRINDEX)
+				{
 				std::cout << "Optical photon is killed because of missing refractive index in either " << thePrePoint->GetMaterial()->GetName() << " or " << thePostPoint->GetMaterial()->GetName() << 
-					" : could also be caused by Overlaps with volumes with logicalBoundaries." << std::endl;
+				" : could also be caused by Overlaps with volumes with logicalBoundaries." << std::endl;
 
-			}
-			/* Debug :  
-			   if( (thePrePV->GetName().find("PMT") != std::string::npos) ||
-			   (thePrePV->GetName().find("pmt") != std::string::npos)){
+				}*/
+		/* Debug :  
+		   if( (thePrePV->GetName().find("PMT") != std::string::npos) ||
+		   (thePrePV->GetName().find("pmt") != std::string::npos)){
 
-			   if(boundary->GetStatus() != StepTooSmall){
-			//	if(thePostPoint->GetProcessDefinedStep()->GetProcessName() != "Transportation")
-			std::cout << "Killed photon between " << thePrePV->GetName() <<
-			" and " << thePostPV->GetName() << " because " << 
-			thePostPoint->GetProcessDefinedStep()->GetProcessName() << 
-			" and boundary status: " <<  boundary->GetStatus() <<
-			std::endl;
-			}
-			}	
-			*/
-
+		   if(boundary->GetStatus() != StepTooSmall){
+		//	if(thePostPoint->GetProcessDefinedStep()->GetProcessName() != "Transportation")
+		std::cout << "Killed photon between " << thePrePV->GetName() <<
+		" and " << thePostPV->GetName() << " because " << 
+		thePostPoint->GetProcessDefinedStep()->GetProcessName() << 
+		" and boundary status: " <<  boundary->GetStatus() <<
+		std::endl;
 		}
+		}	
+		*/
+
+
 
 
 
@@ -293,124 +336,124 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 
 
 	}
-}
-G4int WCSimSteppingAction::G4ThreeVectorToWireTime(G4ThreeVector *pos3d,
-		G4ThreeVector lArPos,
-		G4ThreeVector start,
-		G4int i)
-{
-	G4double x0 = start[0]-lArPos[0];
-	G4double y0 = start[1]-lArPos[1];
-	//   G4double y0 = 2121.3;//mm
-	G4double z0 = start[2]-lArPos[2];
+	}
+	G4int WCSimSteppingAction::G4ThreeVectorToWireTime(G4ThreeVector *pos3d,
+			G4ThreeVector lArPos,
+			G4ThreeVector start,
+			G4int i)
+	{
+		G4double x0 = start[0]-lArPos[0];
+		G4double y0 = start[1]-lArPos[1];
+		//   G4double y0 = 2121.3;//mm
+		G4double z0 = start[2]-lArPos[2];
 
-	G4double dt=0.8;//mm
-	//   G4double midt = 2651.625;
-	G4double pitch = 3;//mm
-	//   G4double midwir = 1207.10;
-	G4double c45 = 0.707106781;
-	G4double s45 = 0.707106781;
+		G4double dt=0.8;//mm
+		//   G4double midt = 2651.625;
+		G4double pitch = 3;//mm
+		//   G4double midwir = 1207.10;
+		G4double c45 = 0.707106781;
+		G4double s45 = 0.707106781;
 
-	G4double w1;
-	G4double w2;
-	G4double t;
+		G4double w1;
+		G4double w2;
+		G4double t;
 
-	//   G4double xField(0.);
-	//   G4double yField(0.);
-	//   G4double zField(0.);
+		//   G4double xField(0.);
+		//   G4double yField(0.);
+		//   G4double zField(0.);
 
-	//   if(detector->getElectricFieldDistortion())
-	//     {
-	//       Distortion(pos3d->getX(),
-	// 		 pos3d->getY());
+		//   if(detector->getElectricFieldDistortion())
+		//     {
+		//       Distortion(pos3d->getX(),
+		// 		 pos3d->getY());
 
-	//       xField = ret[0];
-	//       yField = ret[1];
-	//       zField = pos3d->getZ();
+		//       xField = ret[0];
+		//       yField = ret[1];
+		//       zField = pos3d->getZ();
 
-	//       w1 = (int)(((zField+z0)*c45 + (x0-xField)*s45)/pitch); 
-	//       w2 = (int)(((zField+z0)*c45 + (x0+xField)*s45)/pitch); 
-	//       t = (int)(yField+1);
+		//       w1 = (int)(((zField+z0)*c45 + (x0-xField)*s45)/pitch); 
+		//       w2 = (int)(((zField+z0)*c45 + (x0+xField)*s45)/pitch); 
+		//       t = (int)(yField+1);
 
-	//       //G4cout<<" x orig "<<pos3d->getX()<<" y orig "<<(pos3d->getY()+y0)/dt<<G4endl;
-	//       //G4cout<<" x new "<<xField<<" y new "<<yField<<G4endl;
-	//     }
-	//   else 
-	//     {
+		//       //G4cout<<" x orig "<<pos3d->getX()<<" y orig "<<(pos3d->getY()+y0)/dt<<G4endl;
+		//       //G4cout<<" x new "<<xField<<" y new "<<yField<<G4endl;
+		//     }
+		//   else 
+		//     {
 
-	w1 = (int) (((pos3d->getZ()+z0)*c45 + (x0-pos3d->getX())*s45)/pitch); 
-	w2 = (int)(((pos3d->getZ()+z0)*c45 + (x0+pos3d->getX())*s45)/pitch); 
-	t  = (int)((pos3d->getY()+y0)/dt +1);
-	//     }
+		w1 = (int) (((pos3d->getZ()+z0)*c45 + (x0-pos3d->getX())*s45)/pitch); 
+		w2 = (int)(((pos3d->getZ()+z0)*c45 + (x0+pos3d->getX())*s45)/pitch); 
+		t  = (int)((pos3d->getY()+y0)/dt +1);
+		//     }
 
-	if (i==0)
-		return (int)w1;
-	else if (i==1)
-		return (int)w2;
-	else if (i==2)
-		return (int)t;
-	else return 0;
-} 
-
-
-void WCSimSteppingAction::Distortion(G4double /*x*/,G4double /*y*/)
-{
-
-	//   G4double theta,steps,yy,y0,EvGx,EvGy,EField,velocity,tSample,dt;
-	//   y0=2121.3;//mm
-	//   steps=0;//1 mm steps
-	//   tSample=0.4; //micros
-	//   dt=0.8;//mm
-	//   LiquidArgonMedium medium;  
-	//   yy=y;
-	//   while(y<y0 && y>-y0 )
-	//     {
-	//       EvGx=FieldLines(x,y,1);
-	//       EvGy=FieldLines(x,y,2);
-	//       theta=atan(EvGx/EvGy);
-	//       if(EvGy>0)
-	// 	{
-	// 	  x+=sin(theta);
-	// 	  y+=cos(theta);
-	// 	}
-	//       else
-	// 	{
-	// 	  y-=cos(theta);
-	// 	  x-=sin(theta);
-	// 	}
-	//       EField=sqrt(EvGx*EvGx+EvGy*EvGy);//kV/mm
-	//       velocity=medium.DriftVelocity(EField*10);// mm/microsec
-	//       steps+=1/(tSample*velocity);
-
-	//       //G4cout<<" step "<<steps<<" x "<<x<<" y "<<y<<" theta "<<theta<<" Gx "<<eventaction->Gx->Eval(x,y)<<" Gy "<<eventaction->Gy->Eval(x,y)<<" EField "<<EField<<" velocity "<<velocity<<G4endl;
-	//     }
-
-	//   //numbers
-	//   //EvGx=FieldLines(0,1000,1);
-	//   //EvGy=FieldLines(0,1000,2);
-	//   //EField=sqrt(EvGx*EvGx+EvGy*EvGy);//kV/mm
-	//   //velocity=medium.DriftVelocity(EField*10);// mm/microsec
-	//   //G4double quenching;
-	//   //quenching=medium.QuenchingFactor(2.1,EField*10);
-	//   //G4cout<<" Gx "<<EvGx<<" Gy "<<EvGy<<" EField "<<EField<<" velocity "<<velocity<<" quenching "<<quenching<<G4endl;
+		if (i==0)
+			return (int)w1;
+		else if (i==1)
+			return (int)w2;
+		else if (i==2)
+			return (int)t;
+		else return 0;
+	} 
 
 
-	//ret[0]=5;
-	//   if(yy>0)
-	//     ret[1]=2*y0/dt -steps;
-	//   else
-	//     ret[1]=steps; 
-}
+	void WCSimSteppingAction::Distortion(G4double /*x*/,G4double /*y*/)
+	{
+
+		//   G4double theta,steps,yy,y0,EvGx,EvGy,EField,velocity,tSample,dt;
+		//   y0=2121.3;//mm
+		//   steps=0;//1 mm steps
+		//   tSample=0.4; //micros
+		//   dt=0.8;//mm
+		//   LiquidArgonMedium medium;  
+		//   yy=y;
+		//   while(y<y0 && y>-y0 )
+		//     {
+		//       EvGx=FieldLines(x,y,1);
+		//       EvGy=FieldLines(x,y,2);
+		//       theta=atan(EvGx/EvGy);
+		//       if(EvGy>0)
+		// 	{
+		// 	  x+=sin(theta);
+		// 	  y+=cos(theta);
+		// 	}
+		//       else
+		// 	{
+		// 	  y-=cos(theta);
+		// 	  x-=sin(theta);
+		// 	}
+		//       EField=sqrt(EvGx*EvGx+EvGy*EvGy);//kV/mm
+		//       velocity=medium.DriftVelocity(EField*10);// mm/microsec
+		//       steps+=1/(tSample*velocity);
+
+		//       //G4cout<<" step "<<steps<<" x "<<x<<" y "<<y<<" theta "<<theta<<" Gx "<<eventaction->Gx->Eval(x,y)<<" Gy "<<eventaction->Gy->Eval(x,y)<<" EField "<<EField<<" velocity "<<velocity<<G4endl;
+		//     }
+
+		//   //numbers
+		//   //EvGx=FieldLines(0,1000,1);
+		//   //EvGy=FieldLines(0,1000,2);
+		//   //EField=sqrt(EvGx*EvGx+EvGy*EvGy);//kV/mm
+		//   //velocity=medium.DriftVelocity(EField*10);// mm/microsec
+		//   //G4double quenching;
+		//   //quenching=medium.QuenchingFactor(2.1,EField*10);
+		//   //G4cout<<" Gx "<<EvGx<<" Gy "<<EvGy<<" EField "<<EField<<" velocity "<<velocity<<" quenching "<<quenching<<G4endl;
 
 
-double WCSimSteppingAction::FieldLines(G4double /*x*/,G4double /*y*/,G4int /*coord*/)
-{ //0.1 kV/mm = field
-	//G4double Radius=302;//mm
-	//   G4double Radius=602;//mm
-	//   if(coord==1) //x coordinate
-	//     return  (0.1*(2*Radius*Radius*x*abs(y)/((x*x+y*y)*(x*x+y*y))));
-	//   else //y coordinate
-	//     return 0.1*((abs(y)/y)*(1-Radius*Radius/((x*x+y*y)*(x*x+y*y))) + abs(y)*(2*Radius*Radius*y/((x*x+y*y)*(x*x+y*y))));
-	return 0;
-}
+		//ret[0]=5;
+		//   if(yy>0)
+		//     ret[1]=2*y0/dt -steps;
+		//   else
+		//     ret[1]=steps; 
+	}
+
+
+	double WCSimSteppingAction::FieldLines(G4double /*x*/,G4double /*y*/,G4int /*coord*/)
+	{ //0.1 kV/mm = field
+		//G4double Radius=302;//mm
+		//   G4double Radius=602;//mm
+		//   if(coord==1) //x coordinate
+		//     return  (0.1*(2*Radius*Radius*x*abs(y)/((x*x+y*y)*(x*x+y*y))));
+		//   else //y coordinate
+		//     return 0.1*((abs(y)/y)*(1-Radius*Radius/((x*x+y*y)*(x*x+y*y))) + abs(y)*(2*Radius*Radius*y/((x*x+y*y)*(x*x+y*y))));
+		return 0;
+	}
 

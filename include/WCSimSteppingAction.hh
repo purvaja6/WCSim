@@ -5,6 +5,7 @@
 #include "G4UserSteppingAction.hh"
 #include "G4ThreeVector.hh"
 
+
 class G4HCofThisEvent;
 class G4Event;
 
@@ -12,8 +13,8 @@ class WCSimSteppingAction : public G4UserSteppingAction
 {
 
 public:
-  WCSimSteppingAction()
-  {};
+  WCSimSteppingAction() 
+ {};
 
   ~WCSimSteppingAction()
   { };

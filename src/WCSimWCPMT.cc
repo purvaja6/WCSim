@@ -110,6 +110,7 @@ void WCSimWCPMT::MakePeCorrection(WCSimWCHitsCollection* WCHC)
 
       // Get the information from the hit
       G4int   tube         = (*WCHC)[i]->GetTubeID();
+      G4int   iHR         = (*WCHC)[i]->GetIsHitReflector();
       G4double peSmeared = 0.0;
       double time_PMT, time_true;
       G4int  track_id      = (*WCHC)[i]->GetTrackID();
@@ -139,11 +140,12 @@ void WCSimWCPMT::MakePeCorrection(WCSimWCHitsCollection* WCHC)
 	    G4ThreeVector photon_startpos = (*WCHC)[i]->GetPhotonStartPos(ip);
 	    G4ThreeVector photon_endpos = (*WCHC)[i]->GetPhotonEndPos(ip);
 	    
-	    if ( DigiHitMapPMT[tube] == 0) {
+	    if ( DigiHitMapPMT[tube] == 0) {			//me: this loop is managing if the hit already exists or not
 	      WCSimWCDigi* Digi = new WCSimWCDigi();
 	      Digi->SetLogicalVolume((*WCHC)[0]->GetLogicalVolume());
 	      Digi->AddPe(time_PMT);
 	      Digi->SetTubeID(tube);
+	      Digi->SetIsHitReflector(iHR); //me:for logicreflector
 	      Digi->SetPos(pmt_position);
 	      Digi->SetOrientation(pmt_orientation);
 	      Digi->SetPe(ip,peSmeared);
@@ -162,6 +164,7 @@ void WCSimWCPMT::MakePeCorrection(WCSimWCHitsCollection* WCHC)
 	      (*DigitsCollection)[DigiHitMapPMT[tube]-1]->SetPe(ip,peSmeared);
 	      (*DigitsCollection)[DigiHitMapPMT[tube]-1]->SetTime(ip,time_PMT);
 	      (*DigitsCollection)[DigiHitMapPMT[tube]-1]->SetTubeID(tube); 
+	      (*DigitsCollection)[DigiHitMapPMT[tube]-1]->SetIsHitReflector(iHR); //me:for logicreflector
 	      (*DigitsCollection)[DigiHitMapPMT[tube]-1]->SetPos(pmt_position);
 	      (*DigitsCollection)[DigiHitMapPMT[tube]-1]->SetOrientation(pmt_orientation);
 	      (*DigitsCollection)[DigiHitMapPMT[tube]-1]->SetTrackID(track_id);

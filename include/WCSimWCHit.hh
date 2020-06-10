@@ -67,6 +67,7 @@ class WCSimWCHit : public G4VHit
   void AddPhotonStartPos  (const G4ThreeVector &photStartPos) { photonStartPos.push_back(photStartPos); }
   void AddPhotonEndPos  (const G4ThreeVector &photEndPos) { photonEndPos.push_back(photEndPos); }
 
+  void SetIsHitReflector       (G4int iHR)                 { IsHitReflector = iHR; };
   // This is temporarily used for the drawing scale
   void SetMaxPe(G4int number = 0)  {maxPe   = number;};
 
@@ -91,6 +92,9 @@ class WCSimWCHit : public G4VHit
   G4float       GetPhotonStartTime(int i) { return photonStartTime[i];};
   G4ThreeVector GetPhotonStartPos(int i) { return photonStartPos[i];};
   G4ThreeVector GetPhotonEndPos(int i) { return photonEndPos[i];};
+
+
+  G4int         GetIsHitReflector()     { return IsHitReflector; };
   
   G4LogicalVolume* GetLogicalVolume() {return pLogV;};
 
@@ -159,6 +163,7 @@ class WCSimWCHit : public G4VHit
   G4RotationMatrix rot;
   G4LogicalVolume* pLogV;
 
+  G4int IsHitReflector;
   // This is temporarily used for the drawing scale
   // Since its static *every* WChit sees the same value for this.
 

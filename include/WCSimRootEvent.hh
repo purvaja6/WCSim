@@ -86,6 +86,7 @@ class WCSimRootCherenkovHit : public TObject {
 
 private:
   Int_t fTubeID;
+Int_t fIsHitReflector;
   Int_t fmPMTID;
   Int_t fmPMT_PMTID;
   Int_t fTotalPe[2];
@@ -93,9 +94,11 @@ private:
 public:
   WCSimRootCherenkovHit() {}
   WCSimRootCherenkovHit(Int_t tubeID,
+			Int_t fiHR,
 			Int_t totalPe[2]);
 
   WCSimRootCherenkovHit(Int_t tubeID,
+			Int_t fiHR,
 			Int_t mPMTID,
 			Int_t mPMT_PMTID,
 			Int_t totalPe[2]);
@@ -103,6 +106,7 @@ public:
   virtual ~WCSimRootCherenkovHit() { }
 
   Int_t GetTubeID()       const { return fTubeID;}
+  Int_t GetIsHitReflector()       const { return fIsHitReflector;}
   Int_t GetmPMTID()       const { return fmPMTID;}
   Int_t GetmPMT_PMTID()       const { return fmPMT_PMTID;}
   Int_t GetTotalPe(int i) const { return (i<2) ? fTotalPe[i]: 0;}
@@ -409,6 +413,7 @@ public:
   TClonesArray        *GetTracks() const {return fTracks;}
 
   WCSimRootCherenkovHit   *AddCherenkovHit(Int_t                tubeID,
+					   Int_t		iHR,
 					   Int_t                mPMTID,
 					   Int_t                mPMT_PMTID,
 					  std::vector<Float_t> truetime,
