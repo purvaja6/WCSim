@@ -18,6 +18,8 @@ class WCSimWCSD : public G4VSensitiveDetector
 
   G4bool ProcessHits(G4Step*, G4TouchableHistory*);
   void   EndOfEvent(G4HCofThisEvent*);
+static WCSimWCSD* aSDPointer;  //me:for logicreflector
+std::vector<int> reflectortag; //me:reflectortag
   
  private:
 

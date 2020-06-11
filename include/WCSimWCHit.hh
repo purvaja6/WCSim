@@ -56,6 +56,7 @@ class WCSimWCHit : public G4VHit
  public:
   
   void SetTubeID       (G4int tube)                 { tubeID = tube; };
+  void SetIsHitReflector	 (G4int iHR)                 { IsHitReflector = iHR; };
   void SetTrackID      (G4int track)                { trackID = track; };
   void SetEdep         (G4double de)                { edep = de; };
   void SetPos          (G4ThreeVector xyz)          { pos = xyz; };
@@ -66,7 +67,7 @@ class WCSimWCHit : public G4VHit
   void AddPhotonStartTime (G4float photStartTime) { photonStartTime.push_back(photStartTime); }
   void AddPhotonStartPos  (const G4ThreeVector &photStartPos) { photonStartPos.push_back(photStartPos); }
   void AddPhotonEndPos  (const G4ThreeVector &photEndPos) { photonEndPos.push_back(photEndPos); }
-
+  
   // This is temporarily used for the drawing scale
   void SetMaxPe(G4int number = 0)  {maxPe   = number;};
 
@@ -82,6 +83,7 @@ class WCSimWCHit : public G4VHit
   }
  
   G4int         GetTubeID()     { return tubeID; };
+  G4int         GetIsHitReflector()     { return IsHitReflector; };
   G4int         GetTrackID()    { return trackID; };
   G4ThreeVector GetPos()        { return pos; };
   G4ThreeVector GetOrientation()        { return orient; };
@@ -152,6 +154,7 @@ class WCSimWCHit : public G4VHit
   void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
 
   G4int            tubeID;
+  G4int IsHitReflector;
   G4int            trackID;
   G4double         edep;
   G4ThreeVector    pos;

@@ -40,6 +40,8 @@
 #include "WCSimRootEvent.hh"
 #include "TStopwatch.h"
 
+#include "WCSimWCSD.hh" //me:logicreflector
+
 #ifndef _SAVE_RAW_HITS
 #define _SAVE_RAW_HITS
 #ifndef _SAVE_RAW_HITS_VERBOSE
@@ -133,6 +135,8 @@ void WCSimEventAction::BeginOfEventAction(const G4Event*)
     G4DigiManager* DMman = G4DigiManager::GetDMpointer();
 
   }
+WCSimWCSD *pSD = WCSimWCSD::aSDPointer;// me:for logicreflector
+pSD->reflectortag.clear(); //me:for logicreflector 
 }
 
 void WCSimEventAction::EndOfEventAction(const G4Event* evt)
@@ -888,6 +892,7 @@ void WCSimEventAction::FillRootEvent(G4int event_id,
     //loop over the DigitsCollection
     for(int idigi = 0; idigi < WCDC_hits->entries(); idigi++) {
       int digi_tubeid = (*WCDC_hits)[idigi]->GetTubeID();
+	int digi_iHR = (*WCDC_hits)[idigi]->GetIsHitReflector();
       WCSimPmtInfo *pmt = ((WCSimPmtInfo*)fpmts->at(digi_tubeid -1));
 
       for(G4int id = 0; id < (*WCDC_hits)[idigi]->GetTotalPe(); id++){
@@ -926,6 +931,7 @@ void WCSimEventAction::FillRootEvent(G4int event_id,
       }
 #endif
       wcsimrootevent->AddCherenkovHit(digi_tubeid,
+					digi_iHR,
 				      pmt->Get_mPMTid(),
 				      pmt->Get_mPMT_pmtid(),
 				      truetime,
