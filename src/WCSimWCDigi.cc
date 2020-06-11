@@ -10,6 +10,7 @@ G4Allocator<WCSimWCDigi> WCSimWCDigiAllocator;
 WCSimWCDigi::WCSimWCDigi()
 {
   tubeID = 0; 
+  IsHitReflector = 0;	
   Gates.clear();
   TriggerTimes.clear();
   //  TriggerTimes.reserve(10);
@@ -30,6 +31,7 @@ WCSimWCDigi::WCSimWCDigi(const WCSimWCDigi& right)
   // in principle assignment = is defined for containers...
   Gates = right.Gates;
   tubeID = right.tubeID; 
+  IsHitReflector = right.IsHitReflector;
   pe     = right.pe;
   time   = right.time;
   time_presmear = right.time_presmear;
@@ -39,6 +41,7 @@ const WCSimWCDigi& WCSimWCDigi::operator=(const WCSimWCDigi& right)
 {
   TriggerTimes = right.TriggerTimes;
   tubeID = right.tubeID; 
+  IsHitReflector = right.IsHitReflector;
   pe     = right.pe;
   time   = right.time;
   time_presmear = right.time_presmear;

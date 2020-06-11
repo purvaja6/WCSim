@@ -51,11 +51,11 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructPMT(G4String PMTName, G4Str
 	G4double glassThickness = 0.;
 
 	WCSimPMTObject *PMT = GetPMTPointer(CollectionName);
-	expose = PMT->GetExposeHeight();
-	//expose = 15.31*CLHEP::mm;
+	//expose = PMT->GetExposeHeight();
+	expose = 15.31*CLHEP::mm;
 	std::cout << "expose " << expose << std::endl;
-	radius = PMT->GetRadius();                            //r at height = expose
-	//radius = 36*CLHEP::mm;
+	//radius = PMT->GetRadius();                            //r at height = expose
+	radius = 36*CLHEP::mm;
 	std::cout << "radius " << radius << std::endl;
 	glassThickness = PMT->GetPMTGlassThickness();
 	std::cout <<"glass thickness " << glassThickness << std::endl;
@@ -70,8 +70,8 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructPMT(G4String PMTName, G4Str
 	//Optional reflectorCone:
 	G4double reflectorRadius = radius + id_reflector_height * tan(id_reflector_angle); // PMT radius+ r = h * tan (theta)
 	std::cout << "reflector height" << id_reflector_height << std::endl;
-	G4double reflectorThickness = 0.5*CLHEP::mm;
-	//G4double reflectorThickness = 0.344*CLHEP::mm; //me: the actual reflector thickness is 0.5 mm but due to solid works design, I am taking the horizontal component to calculate the reflector radius. Refer my CAD drawing.
+	//G4double reflectorThickness = 0.5*CLHEP::mm;
+	G4double reflectorThickness = 0.425*CLHEP::mm; //me: the actual reflector thickness is 0.5 mm but due to solid works design, I am taking the horizontal component to calculate the reflector radius. Refer my CAD drawing.
 	std::cout << "reflector thickness" << reflectorThickness << std::endl;
 	if((reflectorRadius - radius) < 1.*CLHEP::mm)
 		reflectorThickness = 0.*CLHEP::mm;
@@ -90,8 +90,8 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructPMT(G4String PMTName, G4Str
 	G4double position_z_offset = 0.;  // for positioning PMTs
 	G4double wcpmt_z_offset = 0.;     // for positioning single PMT support (mPMT)
 	G4bool addPMTBase = false; 
-	G4double pmtModuleHeight = 54.*CLHEP::mm; //includes puck and single PMT support, not PMT base. //default wcsim design
-	//G4double pmtModuleHeight = 59.62 *CLHEP::mm; //the height of pmt module for solid works design
+	//G4double pmtModuleHeight = 54.*CLHEP::mm; //includes puck and single PMT support, not PMT base. //default wcsim design
+	G4double pmtModuleHeight = 59.62 *CLHEP::mm; //the height of pmt module for solid works design
 
 	if(nID_PMTs == 1){
 
@@ -344,41 +344,84 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructPMT(G4String PMTName, G4Str
 	/// Optional Reflector ///
 	//////////////////////////
 	// me: these below lines are for reflector configuration for default wcsim model
-	if(id_reflector_height > 0.1*CLHEP::mm 
-			&& (reflectorRadius-radius) > -5*CLHEP::mm){
-
-		/* Some details:
-		 *               1.1mm is the gap between reflector and PMT for mechanical construction 
-		 *               (KM3NeT support matrix value)
-		 * three degrees of freedom: height, z position and opening angle
-		 */
-		G4Cons* reflectorCone =
-			new G4Cons("WCPMT_reflect",
-					radius + 1.1*CLHEP::mm,                               //rmin
-					radius + 1.1*CLHEP::mm + reflectorThickness,          //rmax
-					reflectorRadius + 1.1*CLHEP::mm,                      //Rmin
-					reflectorRadius + 1.1*CLHEP::mm + reflectorThickness, //Rmax
-					id_reflector_height/2,                                //z/2
-					0, 2*CLHEP::pi);
+	/*if(id_reflector_height > 0.1*CLHEP::mm 
+	  && (reflectorRadius-radius) > -5*CLHEP::mm){
+	  */
+	/* Some details:
+	 *               1.1mm is the gap between reflector and PMT for mechanical construction 
+	 *               (KM3NeT support matrix value)
+	 * three degrees of freedom: height, z position and opening angle
+	 */
+	/*	G4Cons* reflectorCone =
+		new G4Cons("WCPMT_reflect",
+		radius + 1.1*CLHEP::mm,                               //rmin
+		radius + 1.1*CLHEP::mm + reflectorThickness,          //rmax
+		reflectorRadius + 1.1*CLHEP::mm,                      //Rmin
+		reflectorRadius + 1.1*CLHEP::mm + reflectorThickness, //Rmax
+		id_reflector_height/2,                                //z/2
+		0, 2*CLHEP::pi);
 		std::cout << "reflectorradiusmin " << reflectorRadius + 1.1*CLHEP::mm << std::endl;
 		std::cout << "reflectorradiusmax " << reflectorRadius + 1.1*CLHEP::mm + reflectorThickness << std::endl;
 
 		std::cout << "radiusmin" << radius + 1.1*CLHEP::mm << std::endl;
 		std::cout << "radiusmax" << radius + 1.1*CLHEP::mm + reflectorThickness << std::endl;
 		G4LogicalVolume* logicReflector =
+		new G4LogicalVolume(    reflectorCone,
+		G4Material::GetMaterial("Aluminum"), //It actually is Al+ Ag evaporation
+		"reflectorCone",
+		0,0,0);
+
+	// Visualize
+	G4VisAttributes* WCPMTVisAtt3 = new G4VisAttributes(G4Colour(0.0,0.0,1.0));
+	WCPMTVisAtt3->SetForceSolid(true);
+	logicReflector->SetVisAttributes(WCPMTVisAtt3);
+
+	new G4LogicalSkinSurface("ReflectorLogSkinSurface",logicReflector,ReflectorSkinSurface);
+
+	// reflector PMT Placement:
+	new G4PVPlacement(0,
+	G4ThreeVector(0, 0, id_reflector_z_offset+id_reflector_height/2+position_z_offset),
+	logicReflector, // me: current logical
+	"reflectorWCPMT",
+	logicWCPMT, // me: mother logical
+	false,
+	0,
+	checkOverlaps);
+	}*/
+
+	//me: reflector configuration for solid works design
+	if(id_reflector_height > 0.1*CLHEP::mm
+			&& (reflectorRadius-radius) > -5*CLHEP::mm){
+		/*
+		   Some details:
+		 *                  *               1.1mm is the gap between reflector and PMT for mechanical construction 
+		 *                                   *               (KM3NeT support matrix value)
+		 *                                                    * three degrees of freedom: height, z position and opening angle
+		 *                                                                     */
+
+		G4Cons* reflectorCone =
+			new G4Cons("WCPMT_reflect",
+					radius - 0.72*CLHEP::mm,                               //rmin
+					radius - 0.72*CLHEP::mm + reflectorThickness,          //rmax
+					reflectorRadius - 0.72*CLHEP::mm,                      //Rmin
+					reflectorRadius - 0.72*CLHEP::mm + reflectorThickness, //Rmax
+					id_reflector_height/2,                                //z/2
+					0, 2*CLHEP::pi);
+		std::cout << "reflectorradiusmin " << reflectorRadius - 0.72*CLHEP::mm << std::endl;
+		std::cout << "reflectorradiusmax " << reflectorRadius - 0.72*CLHEP::mm + reflectorThickness << std::endl;
+
+		std::cout << "radiusmin" << radius - 0.72*CLHEP::mm << std::endl;
+		std::cout << "radiusmax" << radius - 0.72*CLHEP::mm + reflectorThickness << std::endl;
+		G4LogicalVolume* logicReflector =
 			new G4LogicalVolume(    reflectorCone,
 					G4Material::GetMaterial("Aluminum"), //It actually is Al+ Ag evaporation
 					"reflectorCone",
 					0,0,0);
-
-		// Visualize
 		G4VisAttributes* WCPMTVisAtt3 = new G4VisAttributes(G4Colour(0.0,0.0,1.0));
 		WCPMTVisAtt3->SetForceSolid(true);
 		logicReflector->SetVisAttributes(WCPMTVisAtt3);
 
 		new G4LogicalSkinSurface("ReflectorLogSkinSurface",logicReflector,ReflectorSkinSurface);
-
-		// reflector PMT Placement:
 		new G4PVPlacement(0,
 				G4ThreeVector(0, 0, id_reflector_z_offset+id_reflector_height/2+position_z_offset),
 				logicReflector, // me: current logical
@@ -388,219 +431,66 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructPMT(G4String PMTName, G4Str
 				0,
 				checkOverlaps);
 	}
-	/*
-	//me: reflector configuration for solid works design
-	if(id_reflector_height > 0.1*CLHEP::mm
-	&& (reflectorRadius-radius) > -5*CLHEP::mm){
-
-	Some details:
-	 *                  *               1.1mm is the gap between reflector and PMT for mechanical construction 
-	 *                                   *               (KM3NeT support matrix value)
-	 *                                                    * three degrees of freedom: height, z position and opening angle
-	 *                                                                     */
-
-	/*G4double ReflectorHolderZ[4] = {0*CLHEP::mm, 0.36*CLHEP::mm, 9.29*CLHEP::mm, 9.65*CLHEP::mm};
-	  G4double ReflectorHolderr[4] = {35.629*CLHEP::mm, 35.285*CLHEP::mm, 44.693*CLHEP::mm, 45.075*CLHEP::mm };
-
-	  G4double ReflectorHolderR[4] = {35.629*CLHEP::mm, 35.629*CLHEP::mm, 45.419*CLHEP::mm, 45.075*CLHEP::mm };
-
-	  G4Polycone * reflectorCone =
-	  new G4Polycone("WCPMT_reflect",
-	  0.0*deg,
-	  360.0*deg,
-	  4,
-	  ReflectorHolderZ,
-	  ReflectorHolderr, // R Inner
-	  ReflectorHolderR);// R Outer 
-	  G4Cons* reflectorCone =
-	  new G4Cons("WCPMT_reflect",
-	  radius - 0.72*CLHEP::mm,                               //rmin
-	  radius - 0.72*CLHEP::mm + reflectorThickness,          //rmax
-	  reflectorRadius - 0.72*CLHEP::mm,                      //Rmin
-	  reflectorRadius - 0.72*CLHEP::mm + reflectorThickness, //Rmax
-	  id_reflector_height/2,                                //z/2
-	  0, 2*CLHEP::pi);
-	  std::cout << "reflectorradiusmin " << reflectorRadius - 0.72*CLHEP::mm << std::endl;
-	  std::cout << "reflectorradiusmax " << reflectorRadius - 0.72*CLHEP::mm + reflectorThickness << std::endl;
-
-	  std::cout << "radiusmin" << radius - 0.72*CLHEP::mm << std::endl;
-	  std::cout << "radiusmax" << radius - 0.72*CLHEP::mm + reflectorThickness << std::endl;
-	  G4LogicalVolume* logicReflector =
-	  new G4LogicalVolume(    reflectorCone,
-	  G4Material::GetMaterial("Aluminum"), //It actually is Al+ Ag evaporation
-	  "reflectorCone",
-	  0,0,0);
-	  G4VisAttributes* WCPMTVisAtt3 = new G4VisAttributes(G4Colour(0.0,0.0,1.0));
-	  WCPMTVisAtt3->SetForceSolid(true);
-	  logicReflector->SetVisAttributes(WCPMTVisAtt3);
-
-	  new G4LogicalSkinSurface("ReflectorLogSkinSurface",logicReflector,ReflectorSkinSurface);
-	  new G4PVPlacement(0,
-	  G4ThreeVector(0, 0, id_reflector_z_offset+id_reflector_height/2+position_z_offset),
-	  logicReflector, // me: current logical
-	  "reflectorWCPMT",
-	  logicWCPMT, // me: mother logical
-	  false,
-	  0,
-	  checkOverlaps);
-	  }
 	//me: till here I have made changes in the reflector geometry based on solid works design
-	*/
+
 	// me:I have commented out from here
 
 	if(nID_PMTs > 1){
 		////////////////////
 		/// 1-PMT support //
 		////////////////////
-		//54mm is position of full PMT support wrt inside of pressure vessel.
-		G4Cons * solidWCPMTsupport =
-			new G4Cons("WCPMTsupport",
-					0.,                                                                      //rmin1
-					tan(mPMT_pmt_openingAngle)*(vessel_radius_curv - mPMT_outer_material_d - pmtModuleHeight),      //rmax1
-					0.,                                                                      //rmin2
-					tan(mPMT_pmt_openingAngle)*(vessel_radius_curv - mPMT_outer_material_d
-						-expose - dist_pmt_vessel),                                //rmax2
-					(pmtModuleHeight - expose - dist_pmt_vessel)/2,                                   //h/2
-					0.0*deg,                                                                 //phiStart
-					360.0*deg);                                                              //Deltaphi
-		std::cout << "1pmtsupport_rmax " << tan(mPMT_pmt_openingAngle)*(vessel_radius_curv - mPMT_outer_material_d - pmtModuleHeight) << std::endl;
-		std::cout << "1pmtsupport_rmax2 " << tan(mPMT_pmt_openingAngle)*(vessel_radius_curv - mPMT_outer_material_d-expose - dist_pmt_vessel) << std::endl;                                //rmax2
-		std::cout << "1pmtsupport_halfz " <<  (pmtModuleHeight - expose - dist_pmt_vessel)/2 << std::endl;
+		// me:till here. There has been no change made in these above lines. They define the default WCSim geometry. */ 
 
-		//h/2
-		G4LogicalVolume* logicWCPMTsupport =
-			new G4LogicalVolume(solidWCPMTsupport,
-					G4Material::GetMaterial("Blacksheet"), 
-					"WCPMTsupport",
-					0,0,0);
 
-		new G4LogicalSkinSurface("FoamLogSkinSurface",logicWCPMTsupport,OpGelFoamSurface);
+		//me:changed the lines below to adapt solid works design
 
-		new G4PVPlacement(0,
-				G4ThreeVector(0, 0, wcpmt_z_offset+(pmtModuleHeight - expose - dist_pmt_vessel)/2),
-				logicWCPMTsupport,
-				"WCPMTsupport",
-				logicWCPMT,
-				false,
-				0,
-				checkOverlaps);
-		std::cout << "support1_placement " << wcpmt_z_offset+(pmtModuleHeight - expose - dist_pmt_vessel)/2 << std::endl;
-		// Visualize
-		G4VisAttributes* WCPMTVisAtt_sup = new G4VisAttributes(G4Colour(0.3,0.3,0.3));
-		WCPMTVisAtt_sup->SetForceSolid(true);
-		logicWCPMTsupport->SetVisAttributes(WCPMTVisAtt_sup);
+		//support
 
-		// me:till here. There has been no change made in these lines. 
-
-		//Reflector support
-		if(id_reflector_height > 0.1*CLHEP::mm 
+		if(id_reflector_height > 0.1*CLHEP::mm
 				&& (reflectorRadius-radius) > -5*CLHEP::mm){
 
-			G4double ReflectorHolderZ[3] = {0, id_reflector_z_offset, id_reflector_z_offset+id_reflector_height};
-			G4double ReflectorHolderR[3] = {tan(mPMT_pmt_openingAngle)*(vessel_radius_curv - mPMT_outer_material_d
-					-expose - dist_pmt_vessel),
-				 tan(mPMT_pmt_openingAngle)*(vessel_radius_curv - mPMT_outer_material_d
-						 -expose - dist_pmt_vessel+id_reflector_z_offset),
-				 tan(mPMT_pmt_openingAngle)*(vessel_radius_curv - mPMT_outer_material_d
-						 -expose - dist_pmt_vessel+id_reflector_z_offset
-						 +id_reflector_height)};
+			G4double ReflectorHolderZ[4] = {0, 22.89, 45.26, 53.81};
+			G4double ReflectorHolderR[4] = {39.735, 43.15, 45.41, 46.48};
 
-			G4double ReflectorHolderr[3] = {radius + 1.1*CLHEP::mm + reflectorThickness,
-				radius + 1.1*CLHEP::mm + reflectorThickness,
-				reflectorRadius + 1.1*CLHEP::mm + reflectorThickness};
-			std::cout << "ReflectorHolderZ_2 " << id_reflector_z_offset << std::endl;
-			std::cout << "ReflectorHolderZ_3 " << id_reflector_z_offset+id_reflector_height << std::endl;
-
-			std::cout << "ReflectorHolderR_1 " <<  tan(mPMT_pmt_openingAngle)*(vessel_radius_curv - mPMT_outer_material_d -expose - dist_pmt_vessel) <<std::endl;
-			std::cout << "ReflectorHolderR_2 "<< tan(mPMT_pmt_openingAngle)*(vessel_radius_curv - mPMT_outer_material_d-expose - dist_pmt_vessel+id_reflector_z_offset) << std::endl;
-			std::cout << "ReflectorHolderR_3 "<<  tan(mPMT_pmt_openingAngle)*(vessel_radius_curv - mPMT_outer_material_d-expose - dist_pmt_vessel+id_reflector_z_offset +id_reflector_height) << std::endl;
-
-			std::cout << "ReflectorHolderr_1_2 " << radius + 1.1*CLHEP::mm + reflectorThickness << std::endl;
-			std::cout << "ReflectorHolder_3 " << reflectorRadius + 1.1*CLHEP::mm + reflectorThickness << std::endl;
+			G4double ReflectorHolderr[4] = {26.75, 40.52, 40.52, 45.80};
 
 			G4Polycone * solidWCPMTsupport2 =
 				new G4Polycone("WCPMTsupport2",
 						0.0*deg,
 						360.0*deg,
-						3,
+						4,
 						ReflectorHolderZ,
 						ReflectorHolderr, // R Inner
 						ReflectorHolderR);// R Outer
 
-
 			G4LogicalVolume* logicWCPMTsupport2 =
 				new G4LogicalVolume(solidWCPMTsupport2,
-						G4Material::GetMaterial("Blacksheet"), 
+						G4Material::GetMaterial("Blacksheet"),
 						"WCPMTsupport",
 						0,0,0);
 
+			// Visualize
+			G4VisAttributes* WCPMTVisAtt_sup = new G4VisAttributes(G4Colour(0.3,0.3,0.3));
+			WCPMTVisAtt_sup->SetForceSolid(true);
+			//                         logicWCPMTsupport->SetVisAttributes(WCPMTVisAtt_sup);
 			new G4LogicalSkinSurface("FoamLogSkinSurface2",logicWCPMTsupport2,OpGelFoamSurface);
 			logicWCPMTsupport2->SetVisAttributes(WCPMTVisAtt_sup);
 
 			new G4PVPlacement(0,
-					G4ThreeVector(0, 0, position_z_offset),
+					G4ThreeVector(0, 0, 272.36), // value of the z=0 plane with respect to the origin
 					logicWCPMTsupport2,
 					"WCPMTsupport2",
 					logicWCPMT,
 					false,
 					0,
 					checkOverlaps);
-			std::cout << " position_z_offset " << position_z_offset << std::endl;  
+
+
 		}
-
-	}
-	// me:till here. There has been no change made in these above lines. They define the default WCSim geometry. */ 
-
-	/*
-	//me:changed the lines below to adapt solid works design
-
-	//support
-
-	if(id_reflector_height > 0.1*CLHEP::mm
-	&& (reflectorRadius-radius) > -5*CLHEP::mm){
-
-	G4double ReflectorHolderZ[4] = {0, 22.89, 42.04, 47.18};
-	G4double ReflectorHolderR[4] = {39.735, 43.15, 45.89, 46.615};
-
-	G4double ReflectorHolderr[4] = {26.75, 40.52, 40.52, 45.935};
-
-	G4Polycone * solidWCPMTsupport2 =
-	new G4Polycone("WCPMTsupport2",
-	0.0*deg,
-	360.0*deg,
-	4,
-	ReflectorHolderZ,
-	ReflectorHolderr, // R Inner
-	ReflectorHolderR);// R Outer
-
-	G4LogicalVolume* logicWCPMTsupport2 =
-	new G4LogicalVolume(solidWCPMTsupport2,
-	G4Material::GetMaterial("Blacksheet"),
-	"WCPMTsupport",
-	0,0,0);
-
-	// Visualize
-	G4VisAttributes* WCPMTVisAtt_sup = new G4VisAttributes(G4Colour(0.3,0.3,0.3));
-	WCPMTVisAtt_sup->SetForceSolid(true);
-	//                         logicWCPMTsupport->SetVisAttributes(WCPMTVisAtt_sup);
-	new G4LogicalSkinSurface("FoamLogSkinSurface2",logicWCPMTsupport2,OpGelFoamSurface);
-	logicWCPMTsupport2->SetVisAttributes(WCPMTVisAtt_sup);
-
-	new G4PVPlacement(0,
-	G4ThreeVector(0, 0, 272.36), // value of the z=0 plane with respect to the origin
-	logicWCPMTsupport2,
-	"WCPMTsupport2",
-	logicWCPMT,
-	false,
-	0,
-	checkOverlaps);
+		// me: till here code has been modified to adapt solid works design
 
 
 	}
-	// me: till here code has been modified to adapt solid works design
-
-*/
-
 	/////////////////////////
 	// Sensitive detector ///
 	/////////////////////////

@@ -410,7 +410,7 @@ WCSimRootTrack::WCSimRootTrack(Int_t ipnu,
 
 //_____________________________________________________________________________
 
-WCSimRootCherenkovHit *WCSimRootTrigger::AddCherenkovHit(Int_t tubeID, Int_t mPMTID, Int_t mPMT_PMTID, std::vector<Float_t> truetime,
+WCSimRootCherenkovHit *WCSimRootTrigger::AddCherenkovHit(Int_t tubeID, Int_t iHR, Int_t mPMTID, Int_t mPMT_PMTID, std::vector<Float_t> truetime,
         std::vector<Int_t> primParID, std::vector<Float_t> photonStartTime, std::vector<TVector3> photonStartPos, std::vector<TVector3> photonEndPos)
 {
   // Add a new Cherenkov hit to the list of Cherenkov hits
@@ -437,6 +437,7 @@ WCSimRootCherenkovHit *WCSimRootTrigger::AddCherenkovHit(Int_t tubeID, Int_t mPM
  
   WCSimRootCherenkovHit *cherenkovhit
     = new(cherenkovhits[fNcherenkovhits++]) WCSimRootCherenkovHit(tubeID,
+								  iHR,
 								  mPMTID,
 								  mPMT_PMTID,
 								  WC_Index);
@@ -446,11 +447,13 @@ WCSimRootCherenkovHit *WCSimRootTrigger::AddCherenkovHit(Int_t tubeID, Int_t mPM
 //_____________________________________________________________________________
 
 WCSimRootCherenkovHit::WCSimRootCherenkovHit(Int_t tubeID,
+					     Int_t iHR,
 					     Int_t totalPe[2])
 {
   // Create a WCSimRootCherenkovHitIndex object and fill it with stuff
 
   fTubeID     = tubeID;
+  fIsHitReflector     = iHR;
   fTotalPe[0] = totalPe[0];
   fTotalPe[1] = totalPe[1];
 }
@@ -458,6 +461,7 @@ WCSimRootCherenkovHit::WCSimRootCherenkovHit(Int_t tubeID,
 //_____________________________________________________________________________
 
 WCSimRootCherenkovHit::WCSimRootCherenkovHit(Int_t tubeID,
+					     Int_t iHR,
 					     Int_t mPMTID,
 					     Int_t mPMT_PMTID,
 					     Int_t totalPe[2])
@@ -465,6 +469,7 @@ WCSimRootCherenkovHit::WCSimRootCherenkovHit(Int_t tubeID,
   // Create a WCSimRootCherenkovHitIndex object and fill it with stuff
 
   fTubeID     = tubeID;
+  fIsHitReflector     = iHR;
   fmPMTID     = mPMTID;
   fmPMT_PMTID = mPMT_PMTID;
   fTotalPe[0] = totalPe[0];

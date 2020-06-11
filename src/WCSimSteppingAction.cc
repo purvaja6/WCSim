@@ -13,7 +13,7 @@
 #include "G4SDManager.hh"
 #include "G4RunManager.hh"
 #include "G4OpBoundaryProcess.hh"
-
+#include "WCSimWCSD.hh"
 
 
 G4int WCSimSteppingAction::n_photons_through_mPMTLV = 0;
@@ -26,7 +26,7 @@ G4int WCSimSteppingAction::n_photons_on_smallPMT = 0;
 void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 {
 	//DISTORTION must be used ONLY if INNERTUBE or INNERTUBEBIG has been defined in BidoneDetectorConstruction.cc
-
+	WCSimWCSD *pSD = WCSimWCSD::aSDPointer;// me:for logicreflector
 	const G4Track* track       = aStep->GetTrack();
 	//const G4VProcess* creatorProcess = track->GetCreatorProcess();
 
@@ -43,6 +43,31 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 	G4ThreeVector PrePosition = aStep->GetPreStepPoint()->GetPosition();
 	// std::cout <<"PrePosition_x " << PrePosition(0) << std::endl;
 	// std::cout << "PrePosition_z " << PrePosition(2) << std::endl;
+	
+	G4TouchableHandle theTouchable = thePrePoint->GetTouchableHandle(); //me:will tell you where in the geometry you are
+	G4String VolumeName = theTouchable->GetVolume()->GetLogicalVolume()->GetName();
+	G4ParticleDefinition *particleDefinition =    aStep->GetTrack()->GetDefinition();
+
+
+	if(VolumeName == "reflectorCone" && particleDefinition == G4OpticalPhoton::OpticalPhotonDefinition())
+	{
+		bool tagflag=true;
+
+		if(tagflag)
+		{
+			pSD->reflectortag.push_back(track->GetTrackID());
+		}
+
+		for(unsigned ij=0; ij < pSD->reflectortag.size(); ij++) //me: this will check the trackID of all the photons in an event (of any particle) 
+		{
+			if(track->GetTrackID() == pSD->reflectortag[ij]) 
+			{
+				tagflag=false;
+				break;
+			}		
+
+		}
+	}	
 
 	G4double PrePosition_x = PrePosition(0) + 314.159;
 	G4double PrePosition_z = PrePosition(2) + 314.159;
@@ -160,12 +185,12 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 				G4cout<<" ProcessName:" << (*pv)[i]->GetProcessName() <<G4endl;				
 				boundary = (G4OpBoundaryProcess*)(*pv)[i];
 				G4cout<<"  G4OpBoundaryProcessStatus:" << boundary->GetStatus() <<G4endl;
-				if(boundary-> GetStatus() ==4)
-				{			
+		//		if(boundary-> GetStatus() ==4)
+		//		{			
 					//		if(vertex_r >= 49.5983 && vertex_r <= 50.4975)
-					if(thePrePoint->GetMaterial()->GetName()=="SilGel" && thePostPoint->GetMaterial()->GetName()=="Air")
+		//			if(thePrePoint->GetMaterial()->GetName()=="SilGel" && thePostPoint->GetMaterial()->GetName()=="Air")
 
-					{
+		//			{
 						std::cout << "PreStep Radius  = " << preposition_r << std::endl;
 						std::cout << "PreStep Material " << thePrePoint->GetMaterial()->GetName() << std::endl;
 						std::cout << "PreStep Momentum = " << PreMomentum << std::endl;
@@ -181,11 +206,11 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 						G4double Angle = PostMomentumDirection.angle(PreMomentumDirection);
 						std::cout << " angle_function = " << Angle << std::endl;
 
-						aStep ->GetTrack() ->  SetTrackStatus(fKillTrackAndSecondaries);
-					}
+	//					aStep ->GetTrack() ->  SetTrackStatus(fKillTrackAndSecondaries);
+		//			}
 
 					break;
-				}
+		//		}
 			}
 		}
 	}

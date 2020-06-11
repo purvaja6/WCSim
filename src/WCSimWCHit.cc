@@ -21,6 +21,7 @@ G4double avePe=0.0;
 WCSimWCHit::WCSimWCHit() 
 {
   totalPe = 0;
+  IsHitReflector = 0;
 }
 
 WCSimWCHit::~WCSimWCHit() {}
@@ -30,6 +31,7 @@ WCSimWCHit::WCSimWCHit(const WCSimWCHit& right)
 {
   trackID   = right.trackID;
   tubeID   = right.tubeID;
+ IsHitReflector   = right.IsHitReflector;
   edep      = right.edep;
   pos       = right.pos;
 }
@@ -38,6 +40,7 @@ const WCSimWCHit& WCSimWCHit::operator=(const WCSimWCHit& right)
 {
   trackID   = right.trackID;
   tubeID   =  right.tubeID;
+ IsHitReflector   =  right.IsHitReflector;
   edep      = right.edep;
   pos       = right.pos;
   return *this;
