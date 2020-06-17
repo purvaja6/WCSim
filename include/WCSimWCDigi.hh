@@ -44,6 +44,7 @@ private:
 
   //PMT parameters
   G4int   tubeID;
+G4int IsHitReflector;
   G4RotationMatrix rot;
   G4ThreeVector    pos;
   G4ThreeVector    orient;
@@ -95,7 +96,7 @@ public:
   inline void SetPhotonStartTime(G4int gate, G4float time) { photonStartTime[gate] = time; };
   inline void SetPhotonStartPos(G4int gate, const G4ThreeVector &position) { photonStartPos[gate] = position; };
   inline void SetPhotonEndPos(G4int gate, const G4ThreeVector &position) { photonEndPos[gate] = position; };
-
+inline void SetIsHitReflector(G4int iHR) {IsHitReflector = iHR;}; //me:for logicreflector
   // Add a digit number and unique photon number to fDigiComp
   inline void AddPhotonToDigiComposition(int digi_number, int photon_number){
     fDigiComp[digi_number].push_back(photon_number);
@@ -121,6 +122,7 @@ public:
   inline G4float GetPe(int gate)     {return pe[gate];};
   inline G4float GetTime(int gate)   {return time[gate];};
   inline G4float GetPreSmearTime(int gate)   {return time_presmear[gate];};
+inline G4int   GetIsHitReflector() {return IsHitReflector;}; //me: for logicreflector
   std::vector<int> GetDigiCompositionInfo(int gate);
   inline std::map< int, std::vector<int> > GetDigiCompositionInfo(){return fDigiComp;}
 

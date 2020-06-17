@@ -19,6 +19,8 @@
 
 #include "WCSimSteppingAction.hh"
 
+WCSimWCSD *WCSimWCSD::aSDPointer; //me:for logicreflector
+
 WCSimWCSD::WCSimWCSD(G4String CollectionName, G4String name,WCSimDetectorConstruction* myDet)
 :G4VSensitiveDetector(name)
 {
@@ -34,6 +36,7 @@ WCSimWCSD::WCSimWCSD(G4String CollectionName, G4String name,WCSimDetectorConstru
   fdet = myDet;
   
   HCID = -1;
+aSDPointer = this; //me:for logicreflector
 }
 
 WCSimWCSD::~WCSimWCSD() {}
@@ -217,7 +220,18 @@ G4bool WCSimWCSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 	   newHit->SetTrackID(trackID);
 	   newHit->SetEdep(energyDeposition); 
 	   newHit->SetLogicalVolume(thePhysical->GetLogicalVolume());
-	   
+
+//me:changed from here
+newHit->SetIsHitReflector(0);
+				for(unsigned ijx=0; ijx<reflectortag.size(); ijx++)
+				{
+					if(trackID == reflectortag[ijx]) 
+					{
+						newHit->SetIsHitReflector(1);
+						break;
+					}
+				}
+				//me:till here	   
 	   G4AffineTransform aTrans = theTouchable->GetHistory()->GetTopTransform();
 	   newHit->SetRot(aTrans.NetRotation());
 	   
