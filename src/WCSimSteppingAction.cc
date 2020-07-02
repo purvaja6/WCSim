@@ -187,8 +187,13 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 				G4double vertex_y = vertex_position(1) ;
 				G4double vertex_z = vertex_position(2) ;
 				//				G4double vertex_r = sqrt(pow(vertex_x,2)+pow(vertex_z,2));
-				if(vertex_x>=-330 && vertex_x<=-290 && vertex_z>=-345 && vertex_z<=-333)
+			//	if(vertex_x>=-265 && vertex_x<=-250 && vertex_z>=-330 && vertex_z<=-290) //0degree, photons on other pmts
+				if(vertex_x>=-320 && vertex_x<=-309 && vertex_z>=-288 && vertex_z<=-260) //70degree, photons on other pmts yellow band
+//				if(vertex_x>=-334 && vertex_x<=-329 && vertex_z>=-280 && vertex_z<=-255) //70degree, photons on other pmts blue band
 				{	
+					if(thePrePoint->GetMaterial()->GetName()=="Glass" || thePostPoint->GetMaterial()->GetName()=="Glass" ||thePostPoint->GetMaterial()->GetName()=="Blacksheet" || thePrePoint->GetMaterial()->GetName()=="Blacksheet")
+
+					{
 					G4cout<<" ProcessName:" << (*pv)[i]->GetProcessName() <<G4endl;				
 					boundary = (G4OpBoundaryProcess*)(*pv)[i];
 					G4cout<<"  G4OpBoundaryProcessStatus:" << boundary->GetStatus() <<G4endl;
@@ -212,7 +217,7 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 					G4double steplength = aStep -> GetStepLength();
 					std::cout << "steplength = " << steplength << std::endl;
 				}
-
+}
 				break;
 			}
 		}
