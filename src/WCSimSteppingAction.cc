@@ -199,34 +199,50 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 				std::cout << "vertex_y = " <<  vertex_position(1) << std::endl;
 				std::cout << "vertex_z = " <<  vertex_position(2) << std::endl;
 
-				if(vertex_x>=-340 && vertex_x<=-290 && vertex_z>=-345 && vertex_z<=-315)
-				{							
-					std::cout << "PreStep Radius  = " << preposition_r << std::endl;
-					std::cout << "PreStep Material " << thePrePoint->GetMaterial()->GetName() << std::endl;
-					std::cout << "PreStep Momentum = " << PreMomentum << std::endl;
-					std::cout << "PreStep MomentumDirection = " << PreMomentumDirection << std::endl;
+				//	if(vertex_x>=-340 && vertex_x<=-290 && vertex_z>=-345 && vertex_z<=-315)
+				//	{							
+				std::cout << "PreStep Radius  = " << preposition_r << std::endl;
+				std::cout << "PreStep Material " << thePrePoint->GetMaterial()->GetName() << std::endl;
+				std::cout << "PreStep Momentum = " << PreMomentum << std::endl;
+				std::cout << "PreStep MomentumDirection = " << PreMomentumDirection << std::endl;
 
 
-					std::cout << "PostStep Radius  = " << postposition_r << std::endl;
-					std::cout << "PostStep Material " << thePostPoint->GetMaterial()->GetName() << std::endl;
-					std::cout << "PostStep Momentum = " << PostMomentum << std::endl;
-					std::cout << "PostStep MomentumDirection = " << PostMomentumDirection << std::endl;
-					//G4double angle = acos((x*X + y*Y + z*Z)/((sqrt(x*x + y*y + z*z)) * (sqrt(X*X + Y*Y + Z*Z))));
-					//std::cout << " angle_calculated = " << angle << std::endl;
-					G4double Angle = PostMomentumDirection.angle(PreMomentumDirection);
-					std::cout << " angle_function = " << Angle << std::endl;
-					G4double steplength = aStep -> GetStepLength();
-					std::cout << "steplength = " << steplength << std::endl;
-					//					aStep ->GetTrack() ->  SetTrackStatus(fKillTrackAndSecondaries);
-					//			}
+				std::cout << "PostStep Radius  = " << postposition_r << std::endl;
+				std::cout << "PostStep Material " << thePostPoint->GetMaterial()->GetName() << std::endl;
+				std::cout << "PostStep Momentum = " << PostMomentum << std::endl;
+				std::cout << "PostStep MomentumDirection = " << PostMomentumDirection << std::endl;
+				//G4double angle = acos((x*X + y*Y + z*Z)/((sqrt(x*x + y*y + z*z)) * (sqrt(X*X + Y*Y + Z*Z))));
+				//std::cout << " angle_calculated = " << angle << std::endl;
+				G4double Angle = PostMomentumDirection.angle(PreMomentumDirection);
+				std::cout << " angle_function = " << Angle << std::endl;
+				G4double steplength = aStep -> GetStepLength();
+				std::cout << "steplength = " << steplength << std::endl;
+				//					aStep ->GetTrack() ->  SetTrackStatus(fKillTrackAndSecondaries);
+				//			}
 
-					break;
-
-			}
+				break;
 
 			}
+
 			}
-		}
+			
+			for(G4int j=0;j<nprocesses;j++)
+			{
+
+				if( (*pv)[j]->GetProcessType()==fOptical && (*pv)[j]->GetProcessSubType() == 32 )
+				{
+					boundary = (G4OpBoundaryProcess*)(*pv)[i];
+					if(boundary-> GetStatus() ==4)
+					{			
+						if(thePrePoint->GetMaterial()->GetName()=="SilGel" && thePostPoint->GetMaterial()->GetName()=="Air")
+
+						{
+							aStep ->GetTrack() ->  SetTrackStatus(fKillTrackAndSecondaries);
+						}
+					}
+				}
+			}			
+	}
 		//changed from here
 		/*	if( (*pv)[i]->GetProcessType()==fOptical && (*pv)[i]->GetProcessSubType() == 32 )
 			{
