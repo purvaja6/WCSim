@@ -48,14 +48,14 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructPMT(G4String PMTName, G4Str
 
 	G4double expose = 0.;
 	G4double radius = 0.;
+	G4double Radius = 0.;
 	G4double glassThickness = 0.;
 
 	WCSimPMTObject *PMT = GetPMTPointer(CollectionName);
-	//expose = PMT->GetExposeHeight();
-	expose = 15.31*CLHEP::mm;
+	expose = PMT->GetExposeHeight();
 	std::cout << "expose " << expose << std::endl;
-	//radius = PMT->GetRadius();                            //r at height = expose
-	radius = 36*CLHEP::mm;
+	radius = PMT->GetRadius();   
+	Radius = 36*CLHEP::mm;                         //r at height = expose
 	std::cout << "radius " << radius << std::endl;
 	glassThickness = PMT->GetPMTGlassThickness();
 	std::cout <<"glass thickness " << glassThickness << std::endl;
@@ -68,12 +68,12 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructPMT(G4String PMTName, G4Str
 	std::cout << "PMToffset " << PMTOffset << std::endl; 
 
 	//Optional reflectorCone:
-	G4double reflectorRadius = radius + id_reflector_height * tan(id_reflector_angle); // PMT radius+ r = h * tan (theta)
+	G4double reflectorRadius = Radius + id_reflector_height * tan(id_reflector_angle); // PMT radius+ r = h * tan (theta)
 	std::cout << "reflector height" << id_reflector_height << std::endl;
 	//G4double reflectorThickness = 0.5*CLHEP::mm;
 	G4double reflectorThickness = 0.344*CLHEP::mm; //me: the actual reflector thickness is 0.5 mm but due to solid works design, I am taking the horizontal component to calculate the reflector radius. Refer my CAD drawing.
 	std::cout << "reflector thickness" << reflectorThickness << std::endl;
-	if((reflectorRadius - radius) < 1.*CLHEP::mm)
+	if((reflectorRadius - Radius) < 1.*CLHEP::mm)
 		reflectorThickness = 0.*CLHEP::mm;
 
 
@@ -99,8 +99,8 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructPMT(G4String PMTName, G4Str
 		//Origin is on the blacksheet, faces positive z-direction.
 
 		G4double PMTHolderZ[2] = {0, std::max(expose,id_reflector_height+id_reflector_z_offset)};
-		G4double PMTHolderR[2] = {std::max(radius,reflectorRadius) + reflectorThickness, 
-			std::max(radius,reflectorRadius) + reflectorThickness};
+		G4double PMTHolderR[2] = {std::max(Radius,reflectorRadius) + reflectorThickness, 
+			std::max(Radius,reflectorRadius) + reflectorThickness};
 		G4double PMTHolderr[2] = {0,0};
 		//  std::cout << "pmtholderr" << 
 		// std::cout << "PmtholderR" << 
@@ -136,7 +136,7 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructPMT(G4String PMTName, G4Str
 		} else {
 			// version without a base but with optional reflectorCone
 			baseHeight = expose;
-			baseRadius = std::max(radius,reflectorRadius) + reflectorThickness; //radius + reflectorThickness; too tight
+			baseRadius = std::max(Radius,reflectorRadius) + reflectorThickness; //radius + reflectorThickness; too tight
 		}
 
 		// ToDo: extend the shell 
@@ -401,8 +401,8 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructPMT(G4String PMTName, G4Str
 
 		G4Cons* reflectorCone =
 			new G4Cons("WCPMT_reflect",
-					radius,                               //rmin
-					radius + 0.39*CLHEP::mm + reflectorThickness,          //rmax
+					Radius,                               //rmin
+					Radius  + reflectorThickness,          //rmax
 					reflectorRadius ,                      //Rmin
 					reflectorRadius  + reflectorThickness, //Rmax
 					id_reflector_height/2,                                //z/2
@@ -412,8 +412,8 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructPMT(G4String PMTName, G4Str
 		std::cout << "reflectorradiusmin " << reflectorRadius  << std::endl;
 		std::cout << "reflectorradiusmax " << reflectorRadius  + reflectorThickness << std::endl;
 
-		std::cout << "radiusmin" << radius<< std::endl;
-		std::cout << "radiusmax" << radius + reflectorThickness + 0.39*CLHEP::mm << std::endl;
+		std::cout << "radiusmin" << Radius<< std::endl;
+		std::cout << "radiusmax" << Radius + reflectorThickness  << std::endl;
 		G4LogicalVolume* logicReflector =
 			new G4LogicalVolume(    reflectorCone,
 					G4Material::GetMaterial("Aluminum"), //It actually is Al+ Ag evaporation

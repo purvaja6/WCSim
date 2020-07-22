@@ -514,8 +514,8 @@ void WCSimDetectorConstruction::SetNuPrismShort_mPMTGeometry()
 	mPMT_OD_PMT = "PMT3inchR12199_02";
 	WCSimPMTObject * PMT = CreatePMTObject(mPMT_ID_PMT, WCIDCollectionName);
 	WCPMTName = PMT->GetPMTName();
-	WCPMTExposeHeight = 15.31*CLHEP::mm;
-	WCPMTRadius = 36*CLHEP::mm;
+	WCPMTExposeHeight = 20*CLHEP::mm;
+	WCPMTRadius = 40*CLHEP::mm;
 	std::cout << "expose_height " << WCPMTExposeHeight << std::endl;
 	std::cout << "pmtradius" << WCPMTRadius << std::endl; 
 	//mPMT params go first because detector depends on it:
@@ -531,7 +531,7 @@ void WCSimDetectorConstruction::SetNuPrismShort_mPMTGeometry()
 
 	// Radius of cone at z=reflectorHeight
 	id_reflector_height = 8.61*CLHEP::mm;        // for a radius of 7.25mm, for hex: 5.4mm (radius of 6mm)
-	id_reflector_z_offset = 0.74*CLHEP::mm;       //from KM3Net CAD drawings
+	id_reflector_z_offset = 5.425*CLHEP::mm;       //from KM3Net CAD drawings
 	id_reflector_angle = 46.5*CLHEP::deg;         // Need to be remeasured for different PMT curvature 
 	mPMT_pmt_openingAngle = 8.3*CLHEP::deg;     // for hex: 8.5deg
 	G4double vessel_tot_height = vessel_radius + vessel_cyl_height;

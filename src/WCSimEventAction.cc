@@ -133,7 +133,6 @@ void WCSimEventAction::BeginOfEventAction(const G4Event*)
 
     //and save options in output file
     G4DigiManager* DMman = G4DigiManager::GetDMpointer();
-
   }
 WCSimWCSD *pSD = WCSimWCSD::aSDPointer;// me:for logicreflector
 pSD->reflectortag.clear(); //me:for logicreflector 
@@ -142,6 +141,7 @@ pSD->reflectortag.clear(); //me:for logicreflector
 void WCSimEventAction::EndOfEventAction(const G4Event* evt)
 {
 
+ std::cout<<"BeginOfEventAction: #"<<evt->GetEventID()<<std::endl;
   // ----------------------------------------------------------------------
   //  Get Particle Table
   // ----------------------------------------------------------------------

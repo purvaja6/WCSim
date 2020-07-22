@@ -18,6 +18,7 @@
 #include "WCSimTrackInformation.hh"
 
 #include "WCSimSteppingAction.hh"
+#include "G4UnitsTable.hh" 
 
 WCSimWCSD *WCSimWCSD::aSDPointer; //me:for logicreflector
 
@@ -245,7 +246,7 @@ break;
 	   (*hitsCollection)[PMTHitMap[replicaNumber]-1]->AddPhotonStartTime(photonStartTime);
 	   (*hitsCollection)[PMTHitMap[replicaNumber]-1]->AddPhotonStartPos(photonStartPos);
 	   (*hitsCollection)[PMTHitMap[replicaNumber]-1]->AddPhotonEndPos(worldPosition);
-	   
+	  std::cout<<"Photon ---> Start Pos: "<<G4BestUnit(photonStartPos,"Length")<<" End Pos: "<<G4BestUnit(worldPosition,"Length") <<" StartTime: "<<G4BestUnit(photonStartTime,"Time")<< std::endl; 
 	   //     if ( particleDefinition != G4OpticalPhoton::OpticalPhotonDefinition() )
 	   //       newHit->Print();
 	     
@@ -256,7 +257,7 @@ break;
 	 (*hitsCollection)[PMTHitMap[replicaNumber]-1]->AddPhotonStartTime(photonStartTime);
 	 (*hitsCollection)[PMTHitMap[replicaNumber]-1]->AddPhotonStartPos(photonStartPos);
 	 (*hitsCollection)[PMTHitMap[replicaNumber]-1]->AddPhotonEndPos(worldPosition);
-	 
+	std::cout<<"Photon ---> Start Pos: "<<G4BestUnit(photonStartPos,"Length")<<" End Pos: "<<G4BestUnit(worldPosition,"Length") <<" StartTime: "<<G4BestUnit(photonStartTime,"Time")<< std::endl; 
        }
      }
   }

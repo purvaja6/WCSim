@@ -590,6 +590,7 @@ void WCSimRunAction::FillGeoTree(){
 
 
   pmtradius = wcsimdetector->GetPMTSize1();
+std::cout << "pmtradius = " << pmtradius << std::endl;
   numpmt = wcsimdetector->GetTotalNumPmts();
   orientation = 0;
   
@@ -679,6 +680,7 @@ void WCSimRunAction::FillFlatGeoTree(){
   }
   
   pmt_radius_id = wcsimdetector->GetPMTSize1();
+std::cout << "pmt_radius_id = " << pmt_radius_id << std::endl;
   pmt_radius_od = 0;                                //ToDo
   numPMT_id = wcsimdetector->GetTotalNumPmts();
   numPMT_od = 0;                                    //ToDo
