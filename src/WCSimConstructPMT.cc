@@ -51,11 +51,9 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructPMT(G4String PMTName, G4Str
 	G4double glassThickness = 0.;
 
 	WCSimPMTObject *PMT = GetPMTPointer(CollectionName);
-	//expose = PMT->GetExposeHeight();
-	expose = 15.31*CLHEP::mm;
+	expose = PMT->GetExposeHeight();
 	std::cout << "expose " << expose << std::endl;
-	//radius = PMT->GetRadius();                            //r at height = expose
-	radius = 36*CLHEP::mm;
+	radius = PMT->GetRadius();                            //r at height = expose
 	std::cout << "radius " << radius << std::endl;
 	glassThickness = PMT->GetPMTGlassThickness();
 	std::cout <<"glass thickness " << glassThickness << std::endl;
@@ -401,17 +399,17 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructPMT(G4String PMTName, G4Str
 
 		G4Cons* reflectorCone =
 			new G4Cons("WCPMT_reflect",
-					radius - 0.72*CLHEP::mm,                               //rmin
-					radius - 0.72*CLHEP::mm + reflectorThickness,          //rmax
-					reflectorRadius - 0.72*CLHEP::mm,                      //Rmin
-					reflectorRadius - 0.72*CLHEP::mm + reflectorThickness, //Rmax
+					radius - 4.715*CLHEP::mm,                               //rmin
+					radius - 4.715*CLHEP::mm + reflectorThickness,          //rmax
+					reflectorRadius - 4.715*CLHEP::mm,                      //Rmin
+					reflectorRadius - 4.715*CLHEP::mm + reflectorThickness, //Rmax
 					id_reflector_height/2,                                //z/2
 					0, 2*CLHEP::pi);
-		std::cout << "reflectorradiusmin " << reflectorRadius - 0.72*CLHEP::mm << std::endl;
-		std::cout << "reflectorradiusmax " << reflectorRadius - 0.72*CLHEP::mm + reflectorThickness << std::endl;
+		std::cout << "reflectorradiusmin " << reflectorRadius - 4.715*CLHEP::mm << std::endl;
+		std::cout << "reflectorradiusmax " << reflectorRadius - 4.715*CLHEP::mm + reflectorThickness << std::endl;
 
-		std::cout << "radiusmin" << radius - 0.72*CLHEP::mm << std::endl;
-		std::cout << "radiusmax" << radius - 0.72*CLHEP::mm + reflectorThickness << std::endl;
+		std::cout << "radiusmin" << radius - 4.715*CLHEP::mm << std::endl;
+		std::cout << "radiusmax" << radius - 4.715*CLHEP::mm + reflectorThickness << std::endl;
 		G4LogicalVolume* logicReflector =
 			new G4LogicalVolume(    reflectorCone,
 					G4Material::GetMaterial("Aluminum"), //It actually is Al+ Ag evaporation
