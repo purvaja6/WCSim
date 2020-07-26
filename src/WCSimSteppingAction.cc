@@ -163,13 +163,13 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 	//G4OpBoundaryProcessStatus boundaryStatus=Undefined;
 	//static G4ThreadLocal G4OpBoundaryProcess* boundary=NULL;  //doesn't work and needs #include tls.hh from Geant4.9.6 and beyond
 	G4OpBoundaryProcess* boundary=NULL;
-	/*if((preposition_r >= 49.5983 && preposition_r <=50.85 )||( postposition_r >= 49.5983 && postposition_r <= 50.85))
-	  {
+	//if((preposition_r >= 49.5983 && preposition_r <=50.85 )||( postposition_r >= 49.5983 && postposition_r <= 50.85))
+	  ///{
 	  G4ThreeVector vertex_position = aStep -> GetTrack()->GetVertexPosition();
 	  G4ThreeVector vertex_direction = aStep -> GetTrack() -> GetVertexMomentumDirection();
-	  std::cout << "vertex_position = "  << vertex_position << std::endl;
-	  std::cout << "vertex_direction = " << vertex_direction << std::endl;
-	  */	if(!boundary)
+	 // std::cout << "vertex_position = "  << vertex_position << std::endl;
+	  //std::cout << "vertex_direction = " << vertex_direction << std::endl;
+	 	if(!boundary)
 	{
 		G4ProcessManager* pm
 			= aStep->GetTrack()->GetDefinition()->GetProcessManager();
@@ -181,19 +181,14 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 
 			if( (*pv)[i]->GetProcessType()==fOptical && (*pv)[i]->GetProcessSubType() == 32 )
 			{
-				G4ThreeVector vertex_position = aStep -> GetTrack()->GetVertexPosition();
-				G4ThreeVector vertex_direction = aStep -> GetTrack() -> GetVertexMomentumDirection();
-				G4double vertex_x = vertex_position(0) ;
-				G4double vertex_y = vertex_position(1) ;
-				G4double vertex_z = vertex_position(2) ;
 				//				G4double vertex_r = sqrt(pow(vertex_x,2)+pow(vertex_z,2));
 			//	if(vertex_x>=-265 && vertex_x<=-250 && vertex_z>=-330 && vertex_z<=-290) //0degree, photons on other pmts
-				if(vertex_x>=-320 && vertex_x<=-309 && vertex_z>=-288 && vertex_z<=-260) //70degree, photons on other pmts yellow band
+//				if(vertex_x>=-320 && vertex_x<=-309 && vertex_z>=-288 && vertex_z<=-260) //70degree, photons on other pmts yellow band
 //				if(vertex_x>=-334 && vertex_x<=-329 && vertex_z>=-280 && vertex_z<=-255) //70degree, photons on other pmts blue band
-				{	
-					if(thePrePoint->GetMaterial()->GetName()=="Glass" || thePostPoint->GetMaterial()->GetName()=="Glass" ||thePostPoint->GetMaterial()->GetName()=="Blacksheet" || thePrePoint->GetMaterial()->GetName()=="Blacksheet")
+//				{	
+//					if(thePrePoint->GetMaterial()->GetName()=="Glass" || thePostPoint->GetMaterial()->GetName()=="Glass" ||thePostPoint->GetMaterial()->GetName()=="Blacksheet" || thePrePoint->GetMaterial()->GetName()=="Blacksheet")
 
-					{
+//					{
 					G4cout<<" ProcessName:" << (*pv)[i]->GetProcessName() <<G4endl;				
 					boundary = (G4OpBoundaryProcess*)(*pv)[i];
 					G4cout<<"  G4OpBoundaryProcessStatus:" << boundary->GetStatus() <<G4endl;
@@ -216,11 +211,11 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 					std::cout << " Angle = " << Angle << std::endl;
 					G4double steplength = aStep -> GetStepLength();
 					std::cout << "steplength = " << steplength << std::endl;
-				}
-}
 				break;
+				}
+//}
 			}
-		}
+//		}
 
 		for(G4int j=0;j<nprocesses;j++)
 		{
