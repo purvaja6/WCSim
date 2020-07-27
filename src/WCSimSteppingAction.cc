@@ -171,7 +171,7 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 	  std::cout << "vertex_position = "  << vertex_position << std::endl;
 	  std::cout << "vertex_direction = " << vertex_direction << std::endl; 
 	  */
-	if ( particleDefinition != G4OpticalPhoton::OpticalPhotonDefinition()){ //&& energyDeposition == 0.0) {
+/*	if ( particleDefinition != G4OpticalPhoton::OpticalPhotonDefinition()){ //&& energyDeposition == 0.0) {
 
 	} else {
 		//G4Track* aTrack = aStep->GetTrack();
@@ -183,7 +183,7 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 				//	std::cout<<"Process Defined step "<<proc1->GetProcessName()<<std::endl;
 			}
 		} // if(aTrack->GetParentID()==0) {
-	}
+	}*/
 
 	if(!boundary)
 	{
