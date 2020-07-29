@@ -189,12 +189,6 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 				G4cout<<" ProcessName:" << (*pv)[i]->GetProcessName() <<G4endl;				
 				boundary = (G4OpBoundaryProcess*)(*pv)[i];
 				G4cout<<"  G4OpBoundaryProcessStatus:" << boundary->GetStatus() <<G4endl;
-				if(boundary-> GetStatus() ==4)
-				{			
-					//		if(vertex_r >= 49.5983 && vertex_r <= 50.4975)
-					if(thePrePoint->GetMaterial()->GetName()=="SilGel" && thePostPoint->GetMaterial()->GetName()=="Air")
-
-					{
 						std::cout << "vertex_x = " <<  vertex_position(0) << std::endl;
 						std::cout << "vertex_y = " <<  vertex_position(1) << std::endl;
 						std::cout << "vertex_z = " <<  vertex_position(2) << std::endl;
@@ -217,6 +211,26 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 						std::cout << " angle_function = " << Angle << std::endl;
 						G4double steplength = aStep -> GetStepLength();
 						std::cout << "steplength = " << steplength << std::endl;
+
+					break;
+
+
+				}
+			}
+		for( i=0;i<nprocesses;i++)
+		{
+
+			if( (*pv)[i]->GetProcessType()==fOptical && (*pv)[i]->GetProcessSubType() == 32 )
+			{
+				G4cout<<" ProcessName:" << (*pv)[i]->GetProcessName() <<G4endl;				
+				boundary = (G4OpBoundaryProcess*)(*pv)[i];
+				G4cout<<"  G4OpBoundaryProcessStatus:" << boundary->GetStatus() <<G4endl;
+				if(boundary-> GetStatus() ==4)
+				{			
+					//		if(vertex_r >= 49.5983 && vertex_r <= 50.4975)
+					if(thePrePoint->GetMaterial()->GetName()=="SilGel" && thePostPoint->GetMaterial()->GetName()=="Air")
+
+					{
 						aStep ->GetTrack() ->  SetTrackStatus(fKillTrackAndSecondaries);
 					}
 
