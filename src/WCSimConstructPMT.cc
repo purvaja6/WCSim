@@ -451,10 +451,10 @@ std::cout << "reflector_placement" << id_reflector_z_offset+id_reflector_height/
 		if(id_reflector_height > 0.1*CLHEP::mm
 				&& (reflectorRadius-radius) > -5*CLHEP::mm){
 
-			G4double ReflectorHolderZ[4] = {0, 22.89, 40.67, 45.81};
-			G4double ReflectorHolderR[4] = {39.735, 43.20, 45.84, 46.61};
+			G4double ReflectorHolderZ[4] = {0, 22.89, 43.48, 51.99};
+			G4double ReflectorHolderR[4] = {39.735, 42.71, 45.37, 46.48};
 
-			G4double ReflectorHolderr[4] = {26.75, 40.52, 40.52, 45.93};
+			G4double ReflectorHolderr[4] = {26.75, 40.52, 40.52, 45.80};
 
 			G4Polycone * solidWCPMTsupport2 =
 				new G4Polycone("WCPMTsupport2",
