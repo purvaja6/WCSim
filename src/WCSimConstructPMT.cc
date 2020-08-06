@@ -70,7 +70,7 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructPMT(G4String PMTName, G4Str
 	G4double reflectorRadius = radius + id_reflector_height * tan(id_reflector_angle); // PMT radius+ r = h * tan (theta)
 	std::cout << "reflector height" << id_reflector_height << std::endl;
 	//G4double reflectorThickness = 0.5*CLHEP::mm;
-	G4double reflectorThickness = 0.344*CLHEP::mm; //me: the actual reflector thickness is 0.5 mm but due to solid works design, I am taking the horizontal component to calculate the reflector radius. Refer my CAD drawing.
+	G4double reflectorThickness = 0.383*CLHEP::mm; //me: the actual reflector thickness is 0.5 mm but due to solid works design, I am taking the horizontal component to calculate the reflector radius. Refer my CAD drawing.
 	std::cout << "reflector thickness" << reflectorThickness << std::endl;
 	if((reflectorRadius - Radius) < 1.*CLHEP::mm)
 		reflectorThickness = 0.*CLHEP::mm;
@@ -400,19 +400,19 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructPMT(G4String PMTName, G4Str
 
 		G4Cons* reflectorCone =
 			new G4Cons("WCPMT_reflect",
-					radius - 4*CLHEP::mm,                               //rmin
-					radius  + reflectorThickness - 4*CLHEP::mm,          //rmax
-					reflectorRadius - 4*CLHEP::mm,                      //Rmin
-					reflectorRadius  + reflectorThickness - 4*CLHEP::mm, //Rmax
+					radius - 4.715*CLHEP::mm,                               //rmin
+					radius  + reflectorThickness - 4.715*CLHEP::mm,          //rmax
+					reflectorRadius - 4.715*CLHEP::mm,                      //Rmin
+					reflectorRadius  + reflectorThickness - 4.715*CLHEP::mm, //Rmax
 					id_reflector_height/2,                                //z/2
 					0, 2*CLHEP::pi);
 
 
-		std::cout << "reflectorradiusmin " << reflectorRadius - 4*CLHEP::mm << std::endl;
-		std::cout << "reflectorradiusmax " << reflectorRadius  + reflectorThickness - 4*CLHEP::mm << std::endl;
+		std::cout << "reflectorradiusmin " << reflectorRadius - 4.715*CLHEP::mm << std::endl;
+		std::cout << "reflectorradiusmax " << reflectorRadius  + reflectorThickness - 4.715*CLHEP::mm << std::endl;
 
-		std::cout << "radiusmin" << radius - 4*CLHEP::mm<< std::endl;
-		std::cout << "radiusmax" << radius + reflectorThickness - 4*CLHEP::mm << std::endl;
+		std::cout << "radiusmin" << radius - 4.715*CLHEP::mm<< std::endl;
+		std::cout << "radiusmax" << radius + reflectorThickness - 4.715*CLHEP::mm << std::endl;
 		G4LogicalVolume* logicReflector =
 			new G4LogicalVolume(    reflectorCone,
 					G4Material::GetMaterial("Aluminum"), //It actually is Al+ Ag evaporation
@@ -451,10 +451,10 @@ std::cout << "reflector_placement" << id_reflector_z_offset+id_reflector_height/
 		if(id_reflector_height > 0.1*CLHEP::mm
 				&& (reflectorRadius-radius) > -5*CLHEP::mm){
 
-			G4double ReflectorHolderZ[4] = {0, 22.89, 43.48, 51.99};
-			G4double ReflectorHolderR[4] = {39.735, 42.71, 45.37, 46.48};
+			G4double ReflectorHolderZ[4] = {0, 22.89, 43.21, 49.60};
+			G4double ReflectorHolderR[4] = {39.735, 42.88, 45.67, 46.55};
 
-			G4double ReflectorHolderr[4] = {26.75, 40.52, 40.52, 45.80};
+			G4double ReflectorHolderr[4] = {26.75, 40.52, 40.52, 45.87};
 
 			G4Polycone * solidWCPMTsupport2 =
 				new G4Polycone("WCPMTsupport2",
