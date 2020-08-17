@@ -159,10 +159,16 @@ G4bool WCSimWCSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 //    tubeTag << theMother->GetName() << ":";
 
 //  tubeTag << thePhysical->GetName(); 
+	std::cout <<"WCSimWCSD"<<  theTouchable->GetHistoryDepth() << std::endl;
   for (G4int i = theTouchable->GetHistoryDepth()-1 ; i >= 0; i--){
     tubeTag << ":" << theTouchable->GetVolume(i)->GetName();
     tubeTag << "-" << theTouchable->GetCopyNumber(i);
+	
+	std::cout << ":" << theTouchable->GetVolume(i)->GetName();
+	std::cout << "-" << theTouchable->GetCopyNumber(i);
   }
+	std::cout << std::endl;
+
   //  tubeTag << ":" << theTouchable->GetVolume(i)->GetCopyNo(); 
 
   // Debug:
@@ -172,7 +178,7 @@ G4bool WCSimWCSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 
   // Get the tube ID from the tubeTag
   G4int replicaNumber = WCSimDetectorConstruction::GetTubeID(tubeTag.str());
-
+	std::cout <<"replicaNumber = " << replicaNumber << std::endl;
     
   G4float theta_angle = 0.;
   G4float effectiveAngularEfficiency = 0.;
@@ -224,14 +230,24 @@ G4bool WCSimWCSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 
 		//me:changed from here
 	   newHit->SetIsHitReflector(0);
-for(unsigned ijx=0; ijx<reflectortag.size(); ijx++)
-{
-if(trackID == reflectortag[ijx]) 
-{
-newHit->SetIsHitReflector(1);
-break;
-}
-}
+	   newHit->SetNReflectorHit(reflectorTag.size());
+	for(unsigned ijx=0; ijx<reflectorTag.size(); ijx++)
+	{
+		if(trackID == reflectorTag[ijx].trackID) 
+		{
+		G4int reflectorID= reflectorTag[ijx].tubeID;
+		G4ThreeVector reflectorPos = reflectorTag[ijx].pos;
+		newHit->SetIsHitReflector(1);
+		newHit->AddReflectorID(reflectorID);
+		newHit->AddReflectorPos(reflectorPos);	
+		/*bool refflag = true;
+		if(refflag)
+		{
+		newHit->SetReflectorID(replicaNumber);
+		}*/
+		
+		}
+	}
 //me:till here	   
 	   G4AffineTransform aTrans = theTouchable->GetHistory()->GetTopTransform();
 	   newHit->SetRot(aTrans.NetRotation());

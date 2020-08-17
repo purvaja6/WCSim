@@ -52,6 +52,7 @@ public:
 
   //Need to share with EventAction:
   TTree *GetCherenkovHitsTree(){return cherenkovHitsTree;}
+  TTree *GetReflectorHitsTree(){return reflectorHitsTree;}
   TTree *GetCherenkovDigiHitsTree(){return cherenkovDigiHitsTree;}
   TTree *GetTracksTree(){return tracksTree;}
   TTree *GetTriggerTree(){return triggerTree;}
@@ -157,6 +158,7 @@ private:
   TTree* masterTree;
   TTree* geomTree;
   TTree* cherenkovHitsTree;           //cfr. RecoHitSeriesMap
+  TTree* reflectorHitsTree;           //cfr. RecoHitSeriesMap
   TTree* cherenkovDigiHitsTree;       //cfr. RecoHitSeriesMap
   TTree* tracksTree;
   TTree* triggerTree;
@@ -179,6 +181,7 @@ private:
   double offset_z;
   int num_mPMT;
   int tube_id[5000000];
+  int reflector_id[5000000];
   int mPMT_id[5000000];
   int mPMT_pmt_id[5000000];
   double tube_x[5000000];
