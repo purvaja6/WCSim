@@ -56,6 +56,9 @@ class WCSimWCHit : public G4VHit
  public:
   
   void SetTubeID       (G4int tube)                 { tubeID = tube; };
+  void AddReflectorID       (G4int refID)                 { reflectorID.push_back(refID); };
+  void SetNReflectorHit       (G4int nrefHit)                 { reflectorSize = nrefHit; };
+  //void SetReflectorID       (G4int refID)                 { reflectorID = refID; };
   void SetIsHitReflector	 (G4int iHR)                 { IsHitReflector = iHR; };
   void SetTrackID      (G4int track)                { trackID = track; };
   void SetEdep         (G4double de)                { edep = de; };
@@ -67,6 +70,7 @@ class WCSimWCHit : public G4VHit
   void AddPhotonStartTime (G4float photStartTime) { photonStartTime.push_back(photStartTime); }
   void AddPhotonStartPos  (const G4ThreeVector &photStartPos) { photonStartPos.push_back(photStartPos); }
   void AddPhotonEndPos  (const G4ThreeVector &photEndPos) { photonEndPos.push_back(photEndPos); }
+  void AddReflectorPos  (const G4ThreeVector &refPos) { reflectorPos.push_back(refPos); }
   
   // This is temporarily used for the drawing scale
   void SetMaxPe(G4int number = 0)  {maxPe   = number;};
@@ -74,15 +78,26 @@ class WCSimWCHit : public G4VHit
   void AddPe(G4float hitTime)  
   {
     // First increment the totalPe number
-    totalPe++; 
+    totalPe++;
 
     if (totalPe > maxPe) 
       maxPe = totalPe;
 	std::cout << "maxPe" << maxPe << std::endl;
     time.push_back(hitTime);
   }
+/*void AddRefID(G4float hitTime)
+{
+
+reflectorID.size()++; 
  
+    if (reflectorID.size() > maxRef) 
+      maxRef = reflectorID.size();
+}*/
+
+
   G4int         GetTubeID()     { return tubeID; };
+ G4int		GetNReflectorHit()	{return reflectorSize;};
+  G4int         GetReflectorID(int j)     { return reflectorID[j]; };
   G4int         GetIsHitReflector()     { return IsHitReflector; };
   G4int         GetTrackID()    { return trackID; };
   G4ThreeVector GetPos()        { return pos; };
@@ -93,6 +108,7 @@ class WCSimWCHit : public G4VHit
   G4float       GetPhotonStartTime(int i) { return photonStartTime[i];};
   G4ThreeVector GetPhotonStartPos(int i) { return photonStartPos[i];};
   G4ThreeVector GetPhotonEndPos(int i) { return photonEndPos[i];};
+  G4ThreeVector GetReflectorPos(int j)    { return reflectorPos[j];};
   
   G4LogicalVolume* GetLogicalVolume() {return pLogV;};
 
@@ -155,6 +171,7 @@ class WCSimWCHit : public G4VHit
 
   G4int            tubeID;
   G4int IsHitReflector;
+  G4int            reflectorSize;
   G4int            trackID;
   G4double         edep;
   G4ThreeVector    pos;
@@ -168,11 +185,14 @@ class WCSimWCHit : public G4VHit
   static G4int     maxPe;
 
   G4int                 totalPe;
+  //G4int                 reflectorID.size();
   std::vector<G4float>  time;
   std::vector<G4int>    primaryParentID;
+  std::vector<G4int>    reflectorID;
   std::vector<G4float>  photonStartTime;
   std::vector<G4ThreeVector> photonStartPos;
   std::vector<G4ThreeVector> photonEndPos;
+  std::vector<G4ThreeVector> reflectorPos;
   G4int                 totalPeInGate;
 };
 
