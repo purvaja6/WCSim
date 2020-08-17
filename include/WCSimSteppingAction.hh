@@ -10,10 +10,9 @@ class G4Event;
 
 class WCSimSteppingAction : public G4UserSteppingAction
 {
-
 public:
   WCSimSteppingAction()
-  {};
+  { colNameFlag=1;};
 
   ~WCSimSteppingAction()
   { };
@@ -38,7 +37,9 @@ public:
   static G4int n_photons_through_gel;
   static G4int n_photons_on_blacksheet;
   static G4int n_photons_on_smallPMT;
-
+G4String colName;
+int colNameFlag;
+//typedef pair<int,int> reflectorInfo;
 private:
 
   G4double ret[2];

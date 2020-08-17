@@ -69,6 +69,7 @@ struct eventNtuple{
   float truetime[10000000];      // The true time of each hit
   int   vector_index[10000000];  // Index in vector of hits
   int   tubeid[10000000];        // Readout tube ID
+  int   reflectorid[10000000];        // Readout reflector ID
   int   mPMTid[10000000];        // Readout tube mPMT ID
   int   mPMT_pmtid[10000000];    // Readout tube mPMT-PMT ID
   int   parentid[10000000];      // Track ID of originating parent, 1 = initial primary particle ( NOT parentID of parent!!)
@@ -92,6 +93,7 @@ struct eventNtuple{
   float t[10000000];                  // The readout digitized time
   int   digivector_index[10000000];   // Index in vector of digits
   int   digitubeid[10000000];         // Readout tube ID
+  int   digireflectorid[10000000];         // Readout tube ID
   int   digimPMTid[10000000];             // Readout tube mPMT ID
   int   digimPMT_pmtid[10000000];         // Readout tube mPMT-PMT ID
   // Optional?
