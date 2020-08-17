@@ -114,6 +114,29 @@ public:
   ClassDef(WCSimRootCherenkovHit,2)  
 };
 
+//me: for a new reflector class
+class WCSimRootReflectorHit : public TObject {
+
+private:
+  Int_t fReflectorID;
+  Float_t fReflectorPos[3];
+  //Int_t fReflectorID.size();
+public:
+  WCSimRootReflectorHit() {}
+  WCSimRootReflectorHit(Int_t reflectorID, Float_t reflectorPos[3]);//,Int_t reflectorID.size());
+
+ // WCSimRootReflectorHit(Int_t reflectorID);
+
+  virtual ~WCSimRootReflectorHit() { }
+
+  Int_t GetReflectorID()       const { return fReflectorID;}
+  Float_t  GetReflectorPos(int j)  { return(j<3) ? fReflectorPos[j]:0;}
+//Int_t GetNReflectorHit(int i) const { return (i<reflectorID.size()) ? fReflectors.size()[i]: 0;}
+
+  ClassDef(WCSimRootReflectorHit,1)  
+};
+//me: till here for reflector class
+
 class WCSimRootCherenkovHitTime : public TObject {
 
 private:
@@ -324,6 +347,8 @@ private:
   Int_t                fNumTubesHit;        // Number of tubes hit
   Int_t                fNcherenkovhits;      // Number of hits in the array
   TClonesArray         *fCherenkovHits;      //-> Array of WCSimRootCherenkovHits
+  Int_t                fNreflectorhits;      // Number of hits in the array
+  TClonesArray         *fReflectorHits;      //-> Array of WCSimRootReflectorHits	me:for reflector hit class
 
   Int_t                fCherenkovHitCounter;
   Int_t                fNcherenkovhittimes;      // Number of hits in the array
@@ -389,6 +414,7 @@ public:
   Int_t               GetNtrack()             const {return fNtrack; }
   Int_t               GetNcaptures()          const {return fNcaptures; }
   Int_t               GetNcherenkovhits()     const {return fNcherenkovhits; }
+  Int_t               GetNreflectorhits()     const {return fNreflectorhits; }
   Int_t               GetNcherenkovhittimes() const {return fNcherenkovhittimes;}
   Int_t               GetNcherenkovdigihits() const {return fNcherenkovdigihits;}
   Float_t             GetSumQ()               const { return fSumQ;}
@@ -420,11 +446,17 @@ public:
 					  std::vector<Int_t>   primParID,
 					  std::vector<Float_t>   photonStartTime,
 					  std::vector<TVector3>   photonStartPos,
-					  std::vector<TVector3>   photonEndPos);
+					  std::vector<TVector3>   photonEndPos,	
+					  std::vector<Int_t>   refID,
+					 std::vector<TVector3>  reflectorPos);
   TClonesArray        *GetCherenkovHits() const {return fCherenkovHits;}
   TClonesArray        *GetCherenkovHitTimes() const {return fCherenkovHitTimes;}
+  
+TClonesArray        *GetReflectorHits() const {return fReflectorHits;}
+  
+//till here
 
-  WCSimRootCherenkovDigiHit   *AddCherenkovDigiHit(Float_t q, 
+WCSimRootCherenkovDigiHit   *AddCherenkovDigiHit(Float_t q, 
 						   Float_t t, 
 						   Int_t tubeid,
 						   Int_t mpmtid,

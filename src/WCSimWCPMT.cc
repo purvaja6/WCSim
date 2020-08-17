@@ -156,6 +156,7 @@ void WCSimWCPMT::MakePeCorrection(WCSimWCHitsCollection* WCHC)
 	      Digi->SetPhotonStartTime(ip,photon_starttime);
 	      Digi->SetPhotonStartPos(ip,photon_startpos);
 	      Digi->SetPhotonEndPos(ip,photon_endpos);
+	     // Digi->SetReflectorPos(ip,reflectorpos);
 	      DigiHitMapPMT[tube] = DigitsCollection->insert(Digi);
 	    }	
 	    else {
@@ -173,9 +174,23 @@ void WCSimWCPMT::MakePeCorrection(WCSimWCHitsCollection* WCHC)
 	      (*DigitsCollection)[DigiHitMapPMT[tube]-1]->SetPhotonStartTime(ip,photon_starttime);
 	      (*DigitsCollection)[DigiHitMapPMT[tube]-1]->SetPhotonStartPos(ip,photon_startpos);
 	      (*DigitsCollection)[DigiHitMapPMT[tube]-1]->SetPhotonEndPos(ip,photon_endpos);
+	     // (*DigitsCollection)[DigiHitMapPMT[tube]-1]->SetReflectorPos(ip,reflectorpos);
 	    }
       
 	  } // Loop over hits in each PMT
+	  for (G4int ip =0; ip < (*WCHC)[i]->GetNReflectorHit(); ip++){
+	    int reflector_id = (*WCHC)[i]->GetReflectorID(ip);
+	    G4ThreeVector reflectorpos = (*WCHC)[i]->GetReflectorPos(ip);
+	    if ( DigiHitMapPMT[tube] == 0) { //me: this loop is managing if the hit already exists or not
+	      WCSimWCDigi* Digi = new WCSimWCDigi();
+	      Digi->SetReflectorID(ip,reflector_id);
+	     Digi->SetReflectorPos(ip,reflectorpos);
+	    }	
+	    else {
+	      (*DigitsCollection)[DigiHitMapPMT[tube]-1]->SetReflectorID(ip,reflector_id); 
+	      (*DigitsCollection)[DigiHitMapPMT[tube]-1]->SetReflectorPos(ip,reflectorpos);
+	    }
+	}
     }// Loop over PMTs
 }
 

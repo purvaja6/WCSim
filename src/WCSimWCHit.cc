@@ -31,7 +31,8 @@ WCSimWCHit::WCSimWCHit(const WCSimWCHit& right)
 {
   trackID   = right.trackID;
   tubeID   = right.tubeID;
-  IsHitReflector   = right.IsHitReflector;
+  reflectorID   = right.reflectorID;
+ IsHitReflector   = right.IsHitReflector;
   edep      = right.edep;
   pos       = right.pos;
 }
@@ -40,7 +41,8 @@ const WCSimWCHit& WCSimWCHit::operator=(const WCSimWCHit& right)
 {
   trackID   = right.trackID;
   tubeID   =  right.tubeID;
-  IsHitReflector   =  right.IsHitReflector;
+  reflectorID   =  right.reflectorID;
+ IsHitReflector   =  right.IsHitReflector;
   edep      = right.edep;
   pos       = right.pos;
   return *this;
