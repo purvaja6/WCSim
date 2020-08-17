@@ -195,6 +195,7 @@ void WCSimRunAction::BeginOfRunAction(const G4Run* /*aRun*/)
   geomTree->Branch("num_mPMT",&num_mPMT,"num_mPMT/Int_t");   //ID PMTs/n ID per mPMT
   //PMT info:
   geomTree->Branch("Tube",tube_id,"Tube[numPMT_ID]/Int_t");      //ToDo: Add OD and OD identifier
+  geomTree->Branch("Reflector",reflector_id,"Tube[numPMT_ID]/Int_t");      //ToDo: Add OD and OD identifier
   geomTree->Branch("mPMT",mPMT_id,"mPMT[numPMT_ID]/Int_t");      //mPMT: (mPMT - mPMT_PMT) pairs
   geomTree->Branch("mPMT_pmt",mPMT_pmt_id,"mPMT_pmt[numPMT_ID]/Int_t");
   geomTree->Branch("x",tube_x,"x[numPMT_ID]/Double_t");
@@ -212,6 +213,7 @@ void WCSimRunAction::BeginOfRunAction(const G4Run* /*aRun*/)
   FillFlatGeoTree();
 
   cherenkovHitsTree = new TTree("CherenkovHits","Cherenkov Hits Tree");
+  reflectorHitsTree = new TTree("ReflectorHits","Reflector Hits Tree");
   cherenkovDigiHitsTree = new TTree("CherenkovDigiHits","Cherenkov DigiHits Tree");
   tracksTree = new TTree("Tracks","Tracks Tree");
   triggerTree = new TTree("Trigger","Trigger Tree");
@@ -288,7 +290,18 @@ void WCSimRunAction::BeginOfRunAction(const G4Run* /*aRun*/)
   cherenkovHitsTree->Branch("PMT_dirx",(evNtup->tube_dirx),"PMT_dirx[NHits]/Float_t");
   cherenkovHitsTree->Branch("PMT_diry",(evNtup->tube_diry),"PMT_diry[NHits]/Float_t");
   cherenkovHitsTree->Branch("PMT_dirz",(evNtup->tube_dirz),"PMT_dirz[NHits]/Float_t");
-
+  //me: for reflectohits
+  reflectorHitsTree->Branch("Run",&run,"Run/Int_t");
+  reflectorHitsTree->Branch("Event",&event,"Event/Int_t");
+  reflectorHitsTree->Branch("SubEvent",&subevent,"SubEvent/Int_t");
+  reflectorHitsTree->Branch("NHits",&(evNtup->totalNumHits),"NHits/Int_t");   // #PMTs x #(Ch+DN)hits/PMTs
+  reflectorHitsTree->Branch("NHits_noDN",&(evNtup->totalNumHits_noNoise),"NHits_noDN/Int_t");   // #PMTs x #(Ch+DN)hits/PMTs
+  reflectorHitsTree->Branch("NPMTs",&(evNtup->numTubesHit),"NPMTs/Int_t");
+  reflectorHitsTree->Branch("NPMTs_noDN",&(evNtup->numTubesHit_noNoise),"NPMTs_noDN/Int_t");
+  reflectorHitsTree->Branch("Time",(evNtup->truetime),"Time[NHits]/Float_t");
+  reflectorHitsTree->Branch("ParentID",(evNtup->parentid),"ParentID[NHits]/Int_t");
+  reflectorHitsTree->Branch("Reflector",(evNtup->reflectorid),"Reflector[NHits]/Int_t");
+// till here for reflector hits
   cherenkovDigiHitsTree->Branch("Run",&run,"Run/Int_t");
   cherenkovDigiHitsTree->Branch("Event",&event,"Event/Int_t");
   cherenkovDigiHitsTree->Branch("SubEvent",&subevent,"SubEvent/Int_t");

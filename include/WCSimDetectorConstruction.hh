@@ -4,7 +4,6 @@
 #include "WCSimPmtInfo.hh"
 #include "WCSimPMTObject.hh"
 #include "WCSimRootOptions.hh"
-
 #include "G4Transform3D.hh"
 #include "G4VUserDetectorConstruction.hh"
 #include "G4LogicalVolume.hh"
@@ -328,7 +327,7 @@ public:
 }
   G4double GetWCIDDiameter(){ return WCIDDiameter; }
 
-  G4String GetIDCollectionName(){return WCIDCollectionName;}
+  G4String GetIDCollectionName() const {return WCIDCollectionName;}
 
 private:
 

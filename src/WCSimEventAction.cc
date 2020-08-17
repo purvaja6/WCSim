@@ -135,7 +135,7 @@ void WCSimEventAction::BeginOfEventAction(const G4Event*)
     G4DigiManager* DMman = G4DigiManager::GetDMpointer();
   }
 WCSimWCSD *pSD = WCSimWCSD::aSDPointer;// me:for logicreflector
-pSD->reflectortag.clear(); //me:for logicreflector 
+pSD->reflectorTag.clear(); //me:for logicreflector 
 }
 
 void WCSimEventAction::EndOfEventAction(const G4Event* evt)
@@ -252,7 +252,6 @@ void WCSimEventAction::EndOfEventAction(const G4Event* evt)
     }
   }
   
-
 
   // To use Do like This:
   // --------------------
@@ -606,6 +605,7 @@ void WCSimEventAction::FillRootEvent(G4int event_id,
 				     WCSimWCTriggeredDigitsCollection* WCDC)
 {
   // Fill up a Root event with stuff from the ntuple
+std::cout << "entering fill rootevent " << std::endl;
 
   WCSimRootEvent* wcsimrootsuperevent = GetRunAction()->GetRootEvent();
 
@@ -869,7 +869,7 @@ void WCSimEventAction::FillRootEvent(G4int event_id,
 
   std::vector<WCSimPmtInfo*> *fpmts = detectorConstructor->Get_Pmts();
 #ifdef _SAVE_RAW_HITS
-
+std::cout <<"before raw hits "<< std::endl;
   if (WCDC_hits) 
   {
     //add the truth raw hits
@@ -884,6 +884,9 @@ void WCSimEventAction::FillRootEvent(G4int event_id,
     std::vector<float> photonStartTime;
     std::vector<TVector3> photonStartPos;
     std::vector<TVector3> photonEndPos;
+    std::vector<int>   reflectorID;
+    std::vector<TVector3> reflectorPos;
+    
     double hit_time_smear, hit_time_true;
     int hit_parentid;
     float hit_photon_starttime;
@@ -894,7 +897,7 @@ void WCSimEventAction::FillRootEvent(G4int event_id,
       int digi_tubeid = (*WCDC_hits)[idigi]->GetTubeID();
 	int digi_iHR = (*WCDC_hits)[idigi]->GetIsHitReflector();
       WCSimPmtInfo *pmt = ((WCSimPmtInfo*)fpmts->at(digi_tubeid -1));
-
+std::cout << "TotalPe" << (*WCDC_hits)[idigi]->GetTotalPe() << std::endl;
       for(G4int id = 0; id < (*WCDC_hits)[idigi]->GetTotalPe(); id++){
 	hit_time_true  = (*WCDC_hits)[idigi]->GetPreSmearTime(id);
 	hit_parentid = (*WCDC_hits)[idigi]->GetParentID(id);
@@ -930,6 +933,18 @@ void WCSimEventAction::FillRootEvent(G4int event_id,
 	G4cout << G4endl;
       }
 #endif
+std::cout <<"till here" <<std::endl;
+    int hit_reflectorid;
+    TVector3 hit_photon_reflectorpos;
+      for(G4int d = 0; d < (*WCDC_hits)[idigi]->GetNReflectorHit(); d++){
+	hit_reflectorid = (*WCDC_hits)[idigi]->GetReflectorID(d);
+	reflectorID.push_back(hit_reflectorid);
+	hit_photon_reflectorpos = TVector3(
+	        (*WCDC_hits)[idigi]->GetReflectorPos(d)[0],
+	        (*WCDC_hits)[idigi]->GetReflectorPos(d)[1],
+	        (*WCDC_hits)[idigi]->GetReflectorPos(d)[2]);
+	reflectorPos.push_back(hit_photon_reflectorpos);
+	}
       wcsimrootevent->AddCherenkovHit(digi_tubeid,
 					digi_iHR,
 				      pmt->Get_mPMTid(),
@@ -938,18 +953,23 @@ void WCSimEventAction::FillRootEvent(G4int event_id,
 				      primaryParentID,
 				      photonStartTime,
 				      photonStartPos,
-				      photonEndPos);
-      smeartime.clear();
+				      photonEndPos,
+					reflectorID,
+					reflectorPos      
+							);
+	smeartime.clear();
       truetime.clear();
       primaryParentID.clear();
+      //reflectorID.clear();
       photonStartTime.clear();
       photonStartPos.clear();
       photonEndPos.clear();
+      reflectorPos.clear();
+
     }//idigi
   }//if(WCDC_hits)
 #endif //_SAVE_RAW_HITS
 
-  // Add the digitized hits
 
   if (WCDC) 
   {
@@ -1189,7 +1209,7 @@ void WCSimEventAction::FillFlatTree(G4int event_id,
     //     which it is now. Also a THitsMap is easier, but as all info is already
     //     passed on to the DigitsCollection, not required.
 
-    for(int idigi = 0; idigi < WCDC_hits->entries(); idigi++) {
+    for(int idigi = 0; idigi< WCDC_hits->entries(); idigi++) {
       int digi_tubeid = (*WCDC_hits)[idigi]->GetTubeID();
       int numNoiseHits = 0;
 #ifdef _SAVE_RAW_HITS_VERBOSE
@@ -1272,6 +1292,7 @@ void WCSimEventAction::FillFlatTree(G4int event_id,
     // Fill Tree for each subevent
     GetRunAction()->GetTracksTree()->Fill();
     GetRunAction()->GetCherenkovHitsTree()->Fill();
+    GetRunAction()->GetReflectorHitsTree()->Fill();
     GetRunAction()->GetCherenkovDigiHitsTree()->Fill();
     GetRunAction()->GetTriggerTree()->Fill();
     GetRunAction()->GetEventInfoTree()->Fill();
@@ -1352,6 +1373,7 @@ void WCSimEventAction::FillFlatTree(G4int event_id,
     // Fill Tree for each subevent
     GetRunAction()->GetTracksTree()->Fill();
     GetRunAction()->GetCherenkovHitsTree()->Fill();
+    GetRunAction()->GetReflectorHitsTree()->Fill();
     GetRunAction()->GetCherenkovDigiHitsTree()->Fill();
     GetRunAction()->GetTriggerTree()->Fill();
     GetRunAction()->GetEventInfoTree()->Fill();
