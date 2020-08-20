@@ -14,8 +14,7 @@
 #include "G4RunManager.hh"
 #include "G4OpBoundaryProcess.hh"
 #include "WCSimWCSD.hh"
-
-
+#include "G4UnitsTable.hh"
 
 G4int WCSimSteppingAction::n_photons_through_mPMTLV = 0;
 G4int WCSimSteppingAction::n_photons_through_acrylic = 0;
@@ -26,8 +25,17 @@ G4int WCSimSteppingAction::n_photons_on_smallPMT = 0;
 
 void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 {
+
+if (colNameFlag) {
+    const WCSimDetectorConstruction* detectorConstruction
+      = static_cast<const WCSimDetectorConstruction*>
+        (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
+    colName = detectorConstruction->GetIDCollectionName();
+colNameFlag=0;
+  }
 	//DISTORTION must be used ONLY if INNERTUBE or INNERTUBEBIG has been defined in BidoneDetectorConstruction.cc
 	WCSimWCSD *pSD = WCSimWCSD::aSDPointer;// me:for logicreflector
+
 	const G4Track* track       = aStep->GetTrack();
 	//const G4VProcess* creatorProcess = track->GetCreatorProcess();
 
@@ -42,34 +50,61 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 	G4StepPoint* thePrePoint = aStep->GetPreStepPoint();
 	//me:changed from here
 	G4ThreeVector PrePosition = aStep->GetPreStepPoint()->GetPosition();
+	// std::cout <<"PrePosition_x " << PrePosition(0) << std::endl;
+	// std::cout << "PrePosition_z " << PrePosition(2) << std::endl;
 
-	//me:changed from here
 	G4TouchableHandle theTouchable = thePrePoint->GetTouchableHandle(); //me:will tell you where in the geometry you are
 	G4String VolumeName = theTouchable->GetVolume()->GetLogicalVolume()->GetName();
 	G4ParticleDefinition *particleDefinition =    aStep->GetTrack()->GetDefinition();
 
+
 	if(VolumeName == "reflectorCone" && particleDefinition == G4OpticalPhoton::OpticalPhotonDefinition())
 	{
-		bool tagflag=true;
+		//me: took these lines from detector construction to include tubeTag
+		std::stringstream tubeTag;
 
-		if(tagflag)
-		{
-			pSD->reflectortag.push_back(track->GetTrackID());
+		 std::cout << "steppingAction" << theTouchable->GetHistoryDepth() << std::endl;
+		for (G4int i = theTouchable->GetHistoryDepth()-1 ; i >= 1; i--){
+			tubeTag << ":" << theTouchable->GetVolume(i)->GetName();
+			tubeTag << "-" << theTouchable->GetCopyNumber(i);
+
+			std::cout << ":" << theTouchable->GetVolume(i)->GetName();
+			std::cout << "-" << theTouchable->GetCopyNumber(i);
 		}
+		tubeTag << ":" << colName<< "-0";
+		std::cout << ":"<< colName<< "-0"<<std::endl;
+	
+		G4int replicaNumber = WCSimDetectorConstruction::GetTubeID(tubeTag.str());
+		std::cout <<"replicaNumber = " << replicaNumber << std::endl;
+		//till here
+		bool tagflag=true;
+		int trackid = track->GetTrackID();
 
-		for(unsigned ij=0; ij < pSD->reflectortag.size(); ij++) //me: this will check the trackID of all the photons in an event (of any particle) 
+
+		for(unsigned ij=0; ij < pSD->reflectorTag.size(); ij++) //me: this will check the trackID of all the photons in an event (of any particle) 
 		{
-			if(track->GetTrackID() == pSD->reflectortag[ij]) 
+			//if(track->GetTrackID() == pSD->reflectortag[ij]) 
+			if(trackid == pSD->reflectorTag[ij].trackID && replicaNumber== pSD->reflectorTag[ij].tubeID && PrePosition == pSD->reflectorTag[ij].pos)
 			{
 				tagflag=false;
 				break;
 			}		
 
 		}
+		if(tagflag)
+		{
+			//pSD->reflectortag.push_back(trackid);
+			reflectHit refTmp;
+			refTmp.trackID = trackid;
+			refTmp.tubeID = replicaNumber;
+			refTmp.pos = PrePosition;
+
+			pSD-> reflectorTag.push_back(refTmp);
+		}
 	}	
 
-	G4double PrePosition_x = PrePosition(0) + 314.159;
-	G4double PrePosition_z = PrePosition(2) + 314.159;
+	G4double PrePosition_x = PrePosition(0) ;
+	G4double PrePosition_z = PrePosition(2) ;
 	G4double preposition_r = sqrt(pow(PrePosition_x,2) + pow(PrePosition_z,2));
 
 	G4ThreeVector PreMomentum = aStep -> GetPreStepPoint() -> GetMomentum();
@@ -93,8 +128,8 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 	G4ThreeVector PostPosition = aStep->GetPostStepPoint()->GetPosition();  
 	//std::cout << "PostPosition_x " << PostPosition(0) << std::endl;
 	//std::cout << "PostPosition_z " << PostPosition(2) << std::endl;
-	G4double PostPosition_x = PostPosition(0) + 314.159;
-	G4double PostPosition_z = PostPosition(2) + 314.159;
+	G4double PostPosition_x = PostPosition(0) ;
+	G4double PostPosition_z = PostPosition(2) ;
 	G4double postposition_r = sqrt(pow(PostPosition_x,2)+pow(PostPosition_z,2));
 	G4ThreeVector PostMomentum = aStep -> GetPostStepPoint() -> GetMomentum();
 	G4ThreeVector PostMomentumDirection = aStep -> GetPostStepPoint() -> GetMomentumDirection();
@@ -127,9 +162,9 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 	//	{
 	G4ThreeVector vertex_position = aStep -> GetTrack()->GetVertexPosition();
 	G4ThreeVector vertex_direction = aStep -> GetTrack() -> GetVertexMomentumDirection();
-	G4double vertex_x = vertex_position(0) + 314.159;
-	G4double vertex_y = vertex_position(1) + 2861.23;
-	G4double vertex_z = vertex_position(2) + 314.159;
+	G4double vertex_x = vertex_position(0) ;
+	G4double vertex_y = vertex_position(1);
+	G4double vertex_z = vertex_position(2) ;
 	G4double vertex_r = sqrt(pow(vertex_x,2)+pow(vertex_z,2));
 	//aStep -> GetTrack()->  SetVertexPosition(vertex_x, vertex_y, vertex_z);
 
@@ -168,9 +203,25 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 	  G4ThreeVector vertex_position = aStep -> GetTrack()->GetVertexPosition();
 	  G4ThreeVector vertex_direction = aStep -> GetTrack() -> GetVertexMomentumDirection();
 	  std::cout << "vertex_position = "  << vertex_position << std::endl;
-	  std::cout << "vertex_direction = " << vertex_direction << std::endl;
-	  */	if(!boundary)
+	  std::cout << "vertex_direction = " << vertex_direction << std::endl; 
+	  */
+	/*	if ( particleDefinition != G4OpticalPhoton::OpticalPhotonDefinition()){ //&& energyDeposition == 0.0) {
+
+		} else {
+	//G4Track* aTrack = aStep->GetTrack();
+	if(aStep -> GetTrack()->GetParentID()==0) {
+	//std::cout<<"-x-x-x-x-x-x-x-x-x-"<<std::endl;
+	//std::cout<<"StepNum = "<<track->GetCurrentStepNumber()<<" volume "<<VolumeName<<" momDir "<<track->GetMomentumDirection() << " KE "<< G4BestUnit(track->GetKineticEnergy(),"Energy") << std::endl;
+	const  G4VProcess* proc1 = thePostPoint->GetProcessDefinedStep();
+	if(proc1) {
+	//	std::cout<<"Process Defined step "<<proc1->GetProcessName()<<std::endl;
+	}
+	} // if(aTrack->GetParentID()==0) {
+	}*/
+
+	if(!boundary)
 	{
+
 		G4ProcessManager* pm
 			= aStep->GetTrack()->GetDefinition()->GetProcessManager();
 		G4int nprocesses = pm->GetProcessListLength();
@@ -184,40 +235,67 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 				G4cout<<" ProcessName:" << (*pv)[i]->GetProcessName() <<G4endl;				
 				boundary = (G4OpBoundaryProcess*)(*pv)[i];
 				G4cout<<"  G4OpBoundaryProcessStatus:" << boundary->GetStatus() <<G4endl;
-				if(boundary-> GetStatus() ==4)
-				{			
-					//		if(vertex_r >= 49.5983 && vertex_r <= 50.4975)
-					if(thePrePoint->GetMaterial()->GetName()=="SilGel" && thePostPoint->GetMaterial()->GetName()=="Air")
+				//		if(boundary-> GetStatus() ==4)
+				//		{			
+				//		if(vertex_r >= 49.5983 && vertex_r <= 50.4975)
+				//			if(thePrePoint->GetMaterial()->GetName()=="SilGel" && thePostPoint->GetMaterial()->GetName()=="Air")
 
-					{
-						std::cout << "vertex_x = " <<  vertex_position(0) << std::endl;
-						std::cout << "vertex_y = " <<  vertex_position(1) << std::endl;
-						std::cout << "vertex_z = " <<  vertex_position(2) << std::endl;
-						std::cout << "PreStep Radius  = " << preposition_r << std::endl;
-						std::cout << "PreStep Material " << thePrePoint->GetMaterial()->GetName() << std::endl;
-						std::cout << "PreStep Momentum = " << PreMomentum << std::endl;
-						std::cout << "PreStep MomentumDirection = " << PreMomentumDirection << std::endl;
+				//			{
+				std::cout << "vertex_x = " <<  vertex_x << std::endl;
+				std::cout << "vertex_y = " <<  vertex_y << std::endl;
+				std::cout << "vertex_z = " <<  vertex_z << std::endl;
 
+				//	if(vertex_x>=-340 && vertex_x<=-290 && vertex_z>=-345 && vertex_z<=-315)
+				//	{							
+				std::cout << "preposition_x = " << PrePosition_x << std::endl;
+				std::cout << "preposition_y = " << PrePosition(1) << std::endl;
+				std::cout << "preposition_z = " << PrePosition_z << std::endl;
+				std::cout << "PreStep Radius  = " << preposition_r << std::endl;
+				std::cout << "PreStep Material " << thePrePoint->GetMaterial()->GetName() << std::endl;
+				std::cout << "PreStep Momentum = " << PreMomentum << std::endl;
+				std::cout << "PreStep MomentumDirection = " << PreMomentumDirection << std::endl;
 
-						std::cout << "PostStep Radius  = " << postposition_r << std::endl;
-						std::cout << "PostStep Material " << thePostPoint->GetMaterial()->GetName() << std::endl;
-						std::cout << "PostStep Momentum = " << PostMomentum << std::endl;
-						std::cout << "PostStep MomentumDirection = " << PostMomentumDirection << std::endl;
-						G4double angle = acos((x*X + y*Y + z*Z)/((sqrt(x*x + y*y + z*z)) * (sqrt(X*X + Y*Y + Z*Z))));
-						std::cout << " angle_calculated = " << angle << std::endl;
-						G4double Angle = PostMomentumDirection.angle(PreMomentumDirection);
-						std::cout << " angle_function = " << Angle << std::endl;
+				std::cout << "postposition_x = " << PostPosition_x << std::endl;
+				std::cout << "postposition_y = " << PostPosition(1)  << std::endl;
+				std::cout << "postposition_z = " << PostPosition_z << std::endl;
+				std::cout << "PostStep Radius  = " << postposition_r << std::endl;
+				std::cout << "PostStep Material " << thePostPoint->GetMaterial()->GetName() << std::endl;
+				std::cout << "PostStep Momentum = " << PostMomentum << std::endl;
+				std::cout << "PostStep MomentumDirection = " << PostMomentumDirection << std::endl;
+				//G4double angle = acos((x*X + y*Y + z*Z)/((sqrt(x*x + y*y + z*z)) * (sqrt(X*X + Y*Y + Z*Z))));
+				//std::cout << " angle_calculated = " << angle << std::endl;
+				G4double Angle = PostMomentumDirection.angle(PreMomentumDirection);
+				std::cout << " angle_function = " << Angle << std::endl;
+				G4double steplength = aStep -> GetStepLength();
+				std::cout << "steplength = " << steplength << std::endl;
+				//					aStep ->GetTrack() ->  SetTrackStatus(fKillTrackAndSecondaries);
+				//			}
 
-						aStep ->GetTrack() ->  SetTrackStatus(fKillTrackAndSecondaries);
-					}
+				break;
 
-					break;
-				}
 			}
-		}
+
+			}
+			//}
+			//}	
+			for(G4int j=0;j<nprocesses;j++)
+			{
+
+				if( (*pv)[j]->GetProcessType()==fOptical && (*pv)[j]->GetProcessSubType() == 32 )
+				{
+					boundary = (G4OpBoundaryProcess*)(*pv)[i];
+					std::cout << "boundary" << boundary << std::endl;
+					if(boundary-> GetStatus() ==4)
+					{			
+						if(thePrePoint->GetMaterial()->GetName()=="SilGel" && thePostPoint->GetMaterial()->GetName()=="Air")
+
+						{
+							aStep ->GetTrack() ->  SetTrackStatus(fKillTrackAndSecondaries);
+						}
+					}
+				}
+			}			
 	}
-
-
 	//changed from here
 	/*	if( (*pv)[i]->GetProcessType()==fOptical && (*pv)[i]->GetProcessSubType() == 32 )
 		{
@@ -279,30 +357,30 @@ void WCSimSteppingAction::UserSteppingAction(const G4Step* aStep)
 
 
 
-		if(track->GetTrackStatus() == fStopAndKill)
-		{
-			if(boundary->GetStatus() == NoRINDEX)
-			{
-				std::cout << "Optical photon is killed because of missing refractive index in either " << thePrePoint->GetMaterial()->GetName() << " or " << thePostPoint->GetMaterial()->GetName() << 
+		/*			if(track->GetTrackStatus() == fStopAndKill)
+					{
+					if(boundary->GetStatus() == NoRINDEX)
+					{
+					std::cout << "Optical photon is killed because of missing refractive index in either " << thePrePoint->GetMaterial()->GetName() << " or " << thePostPoint->GetMaterial()->GetName() << 
 					" : could also be caused by Overlaps with volumes with logicalBoundaries." << std::endl;
 
-			}
-			/* Debug :  
-			   if( (thePrePV->GetName().find("PMT") != std::string::npos) ||
-			   (thePrePV->GetName().find("pmt") != std::string::npos)){
+					}*/
+		/* Debug :  
+		   if( (thePrePV->GetName().find("PMT") != std::string::npos) ||
+		   (thePrePV->GetName().find("pmt") != std::string::npos)){
 
-			   if(boundary->GetStatus() != StepTooSmall){
-			//	if(thePostPoint->GetProcessDefinedStep()->GetProcessName() != "Transportation")
-			std::cout << "Killed photon between " << thePrePV->GetName() <<
-			" and " << thePostPV->GetName() << " because " << 
-			thePostPoint->GetProcessDefinedStep()->GetProcessName() << 
-			" and boundary status: " <<  boundary->GetStatus() <<
-			std::endl;
-			}
-			}	
-			*/
-
+		   if(boundary->GetStatus() != StepTooSmall){
+		//	if(thePostPoint->GetProcessDefinedStep()->GetProcessName() != "Transportation")
+		std::cout << "Killed photon between " << thePrePV->GetName() <<
+		" and " << thePostPV->GetName() << " because " << 
+		thePostPoint->GetProcessDefinedStep()->GetProcessName() << 
+		" and boundary status: " <<  boundary->GetStatus() <<
+		std::endl;
 		}
+		}	
+		*/
+
+		//}
 
 
 

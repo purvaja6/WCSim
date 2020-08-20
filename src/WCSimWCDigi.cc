@@ -55,7 +55,6 @@ int WCSimWCDigi::operator==(const WCSimWCDigi& right) const
 	  && (time_presmear==right.time_presmear)
 	  && (TriggerTimes==right.TriggerTimes) && (tubeID==right.tubeID) ); 
 }
-
 void WCSimWCDigi::Draw() {;}
 
 void WCSimWCDigi::Print()

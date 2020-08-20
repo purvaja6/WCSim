@@ -13,6 +13,7 @@
 #ifndef REFLEX_DICTIONARY
 ClassImp(WCSimRootCherenkovDigiHit)
 ClassImp(WCSimRootCherenkovHit)
+ClassImp(WCSimRootReflectorHit)
 ClassImp(WCSimRootCherenkovHitTime)
 ClassImp(WCSimRootTrack)
 ClassImp(WCSimRootPi0)
@@ -47,8 +48,10 @@ WCSimRootTrigger::WCSimRootTrigger()
 
   // TClonesArray of WCSimRootCherenkovHits
   fCherenkovHits = 0;
+  fReflectorHits = 0;
   fCherenkovHitTimes = 0;
   fNcherenkovhits = 0;
+  fNreflectorhits = 0;
   fNcherenkovhittimes = 0;
 
   // TClonesArray of WCSimRootCherenkovDigiHits
@@ -89,9 +92,12 @@ void WCSimRootTrigger::Initialize() //actually allocate memory for things in her
   // TClonesArray of WCSimRootCherenkovHits
   fCherenkovHits = new TClonesArray("WCSimRootCherenkovHit", 
 				    10000);
+  fReflectorHits = new TClonesArray("WCSimRootReflectorHit", 
+				    10000);
   fCherenkovHitTimes = new TClonesArray("WCSimRootCherenkovHitTime", 
 					10000);
   fNcherenkovhits = 0;
+  fNreflectorhits = 0;
   fNcherenkovhittimes = 0;
 
   // TClonesArray of WCSimRootCherenkovDigiHits
@@ -130,12 +136,14 @@ WCSimRootTrigger::~WCSimRootTrigger()
 
     fTracks->Delete();            
     fCherenkovHits->Delete();      
+    fReflectorHits->Delete();      
     fCherenkovHitTimes->Delete();   
     fCherenkovDigiHits->Delete();
     fCaptures->Delete();
     
     delete   fTracks;            
     delete   fCherenkovHits;      
+    delete   fReflectorHits;      
     delete   fCherenkovHitTimes;   
     delete   fCherenkovDigiHits;
     delete   fCaptures;
@@ -161,6 +169,7 @@ void WCSimRootTrigger::Clear(Option_t */*option*/)
 
   // TClonesArray of WCSimRootCherenkovHits
   fNcherenkovhits = 0;
+  fNreflectorhits = 0;
   fNcherenkovhittimes = 0;
 
   // TClonesArray of WCSimRootCherenkovDigiHits
@@ -175,6 +184,7 @@ void WCSimRootTrigger::Clear(Option_t */*option*/)
 
   fTracks->Delete();            
   fCherenkovHits->Delete();      
+  fReflectorHits->Delete();      
   fCherenkovHitTimes->Delete();   
   fCherenkovDigiHits->Delete();
   fCaptures->Delete();
@@ -410,11 +420,12 @@ WCSimRootTrack::WCSimRootTrack(Int_t ipnu,
 
 //_____________________________________________________________________________
 
-WCSimRootCherenkovHit *WCSimRootTrigger::AddCherenkovHit(Int_t tubeID,Int_t iHR, Int_t mPMTID, Int_t mPMT_PMTID, std::vector<Float_t> truetime,
-        std::vector<Int_t> primParID, std::vector<Float_t> photonStartTime, std::vector<TVector3> photonStartPos, std::vector<TVector3> photonEndPos)
+WCSimRootCherenkovHit *WCSimRootTrigger::AddCherenkovHit(Int_t tubeID, Int_t iHR, Int_t mPMTID, Int_t mPMT_PMTID, std::vector<Float_t> truetime,
+        std::vector<Int_t> primParID, std::vector<Float_t> photonStartTime, std::vector<TVector3> photonStartPos, std::vector<TVector3> photonEndPos, std::vector<Int_t> refID, std::vector<TVector3> reflectorPos)
 {
   // Add a new Cherenkov hit to the list of Cherenkov hits
   TClonesArray &cherenkovhittimes = *fCherenkovHitTimes;
+  TClonesArray &reflectorhit = *fReflectorHits;
 
   for (unsigned int i =0;i<truetime.size();i++)
   {
@@ -424,12 +435,20 @@ WCSimRootCherenkovHit *WCSimRootTrigger::AddCherenkovHit(Int_t tubeID,Int_t iHR,
     for(int j=0; j<3; j++){
       startPos[j] = photonStartPos[i][j];
       endPos[j] = photonEndPos[i][j];
-    }
+   }
     WCSimRootCherenkovHitTime *cherenkovhittime = 
       new(cherenkovhittimes[fNcherenkovhittimes++]) WCSimRootCherenkovHitTime(truetime[i],primParID[i], photonStartTime[i], startPos, endPos);
-  }
-
-  Int_t WC_Index[2];
+ } 
+  for (unsigned int i =0;i<refID.size();i++)
+	{
+    Float_t ReflectorPos[3];
+    for(int j=0; j<3; j++){
+	ReflectorPos[j] = reflectorPos[i][j]; 
+	}
+	WCSimRootReflectorHit *reflectorHit = 
+		new(reflectorhit[fNreflectorhits++]) WCSimRootReflectorHit(refID[i], ReflectorPos);
+} 
+ Int_t WC_Index[2];
   WC_Index[0] = fNcherenkovhittimes-truetime.size(); //fCherenkovHitCounter-truetime.size();
   WC_Index[1] = truetime.size();
 
@@ -437,7 +456,7 @@ WCSimRootCherenkovHit *WCSimRootTrigger::AddCherenkovHit(Int_t tubeID,Int_t iHR,
  
   WCSimRootCherenkovHit *cherenkovhit
     = new(cherenkovhits[fNcherenkovhits++]) WCSimRootCherenkovHit(tubeID,
-								 iHR,
+								  iHR,
 								  mPMTID,
 								  mPMT_PMTID,
 								  WC_Index);
@@ -447,21 +466,21 @@ WCSimRootCherenkovHit *WCSimRootTrigger::AddCherenkovHit(Int_t tubeID,Int_t iHR,
 //_____________________________________________________________________________
 
 WCSimRootCherenkovHit::WCSimRootCherenkovHit(Int_t tubeID,
-						Int_t iHR,
+					     Int_t iHR,
 					     Int_t totalPe[2])
 {
   // Create a WCSimRootCherenkovHitIndex object and fill it with stuff
 
   fTubeID     = tubeID;
-fIsHitReflector     = iHR; 
- fTotalPe[0] = totalPe[0];
+  fIsHitReflector     = iHR;
+  fTotalPe[0] = totalPe[0];
   fTotalPe[1] = totalPe[1];
 }
 
 //_____________________________________________________________________________
 
 WCSimRootCherenkovHit::WCSimRootCherenkovHit(Int_t tubeID,
-						Int_t iHR,
+					     Int_t iHR,
 					     Int_t mPMTID,
 					     Int_t mPMT_PMTID,
 					     Int_t totalPe[2])
@@ -469,12 +488,39 @@ WCSimRootCherenkovHit::WCSimRootCherenkovHit(Int_t tubeID,
   // Create a WCSimRootCherenkovHitIndex object and fill it with stuff
 
   fTubeID     = tubeID;
-fIsHitReflector     = iHR; 
- fmPMTID     = mPMTID;
+  fIsHitReflector     = iHR;
+  fmPMTID     = mPMTID;
   fmPMT_PMTID = mPMT_PMTID;
   fTotalPe[0] = totalPe[0];
   fTotalPe[1] = totalPe[1];
 }
+
+// _________________________________________________________________________
+//me: for reflectorHit class
+
+WCSimRootReflectorHit::WCSimRootReflectorHit(Int_t refID,Float_t ReflectorPos[3] )
+{
+  // Create a WCSimRootReflectorHitIndex object and fill it with stuff
+
+  fReflectorID     = refID;
+    for (int i=0;i<3;i++) 
+	{
+  	fReflectorPos[i]   = ReflectorPos[i];
+	}
+}
+
+
+//_____________________________________________________________________________
+
+/*WCSimRootReflectorHit::WCSimRootReflectorHit(Int_t reflectorID)
+{
+  // Create a WCSimRootReflectorHitIndex object and fill it with stuff
+
+  fReflectorID     = reflectorID;
+}*/
+//till here
+// ____________________________________________________________
+
 
 WCSimRootCherenkovHitTime::WCSimRootCherenkovHitTime(Float_t truetime, Int_t primParID,
 						     Float_t photonStartTime, Float_t photonStartPos[3], Float_t photonEndPos[3])

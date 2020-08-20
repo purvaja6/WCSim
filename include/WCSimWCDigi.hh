@@ -44,7 +44,7 @@ private:
 
   //PMT parameters
   G4int   tubeID;
-G4int IsHitReflector;
+  G4int IsHitReflector;
   G4RotationMatrix rot;
   G4ThreeVector    pos;
   G4ThreeVector    orient;
@@ -70,9 +70,11 @@ G4int IsHitReflector;
    */
   std::map<int, std::vector<int> > fDigiComp;
   std::map<int, G4int>    primaryParentID; ///< Primary parent ID of the Hit (do not use for Digits)
+  std::map<int, G4int>    reflectorID; ///< Primary parent ID of the Hit (do not use for Digits)
   std::map<int, G4float>    photonStartTime; ///< Primary parent ID of the Hit (do not use for Digits)
   std::map<int, G4ThreeVector>    photonStartPos; ///< Start point of the photon of the Hit (do not use for Digits)
   std::map<int, G4ThreeVector>    photonEndPos; ///< End point of the photon of the Hit (do not use for Digits)
+  std::map<int, G4ThreeVector>    reflectorPos; ///< End point of the photon of the Hit (do not use for Digits)
   
 
   //integrated hit/digit parameters
@@ -93,10 +95,12 @@ public:
   inline void SetTime(G4int gate, G4float T)    {time[gate]   = T;};
   inline void SetPreSmearTime(G4int gate, G4float T)    {time_presmear[gate]   = T;};
   inline void SetParentID(G4int gate, G4int parent) { primaryParentID[gate] = parent; };
+  inline void SetReflectorID(G4int gate, G4int reflector) {reflectorID[gate] = reflector;};
   inline void SetPhotonStartTime(G4int gate, G4float time) { photonStartTime[gate] = time; };
   inline void SetPhotonStartPos(G4int gate, const G4ThreeVector &position) { photonStartPos[gate] = position; };
   inline void SetPhotonEndPos(G4int gate, const G4ThreeVector &position) { photonEndPos[gate] = position; };
-inline void SetIsHitReflector(G4int iHR) {IsHitReflector = iHR;}; //me:for logicreflector
+  inline void SetReflectorPos(G4int gate, const G4ThreeVector &position) { reflectorPos[gate] = position; };
+  inline void SetIsHitReflector(G4int iHR) {IsHitReflector = iHR;}; //me:for logicreflector
   // Add a digit number and unique photon number to fDigiComp
   inline void AddPhotonToDigiComposition(int digi_number, int photon_number){
     fDigiComp[digi_number].push_back(photon_number);
@@ -110,9 +114,11 @@ inline void SetIsHitReflector(G4int iHR) {IsHitReflector = iHR;}; //me:for logic
 
 
   inline G4int          GetParentID(int gate)    { return primaryParentID[gate];};
+  inline G4int          GetReflectorID(int gate)    { return reflectorID[gate];};
   inline G4float        GetPhotonStartTime(int gate)    { return photonStartTime[gate];};
   inline G4ThreeVector  GetPhotonStartPos(int gate)    { return photonStartPos[gate];};
   inline G4ThreeVector  GetPhotonEndPos(int gate)    { return photonEndPos[gate];};
+  inline G4ThreeVector  GetReflectorPos(int gate)    { return reflectorPos[gate];};
   inline G4int          GetTrackID()    { return trackID;};
   inline G4float GetGateTime(int gate) { return TriggerTimes[gate];}
   inline G4int   GetTubeID() {return tubeID;};
@@ -122,7 +128,7 @@ inline void SetIsHitReflector(G4int iHR) {IsHitReflector = iHR;}; //me:for logic
   inline G4float GetPe(int gate)     {return pe[gate];};
   inline G4float GetTime(int gate)   {return time[gate];};
   inline G4float GetPreSmearTime(int gate)   {return time_presmear[gate];};
-inline G4int   GetIsHitReflector() {return IsHitReflector;}; //me: for logicreflector
+  inline G4int   GetIsHitReflector() {return IsHitReflector;}; //me: for logicreflector
   std::vector<int> GetDigiCompositionInfo(int gate);
   inline std::map< int, std::vector<int> > GetDigiCompositionInfo(){return fDigiComp;}
 
@@ -140,6 +146,7 @@ inline G4int   GetIsHitReflector() {return IsHitReflector;}; //me: for logicrefl
   void SetTrackID      (G4int track)                { trackID = track; };
   void SetRot          (G4RotationMatrix rotMatrix) { rot = rotMatrix; };
   G4int         GetTotalPe()    { return totalPe;};
+  G4int         GetNReflectorHit()    { return reflectorID.size();};
   
   void SetMaxPe(G4int number = 0)  {maxPe   = number;};
 

@@ -120,6 +120,7 @@ void WCSimDetectorConstruction::DescribeAndRegisterPMT(G4VPhysicalVolume* aPV ,i
     // This scheme must match that used in WCSimWCSD::ProcessHits()
 
     std::string tubeTag;
+    std::string reflectorTag;
     int mPMT_pmtno = -1;
     bool foundString = false;
     //
